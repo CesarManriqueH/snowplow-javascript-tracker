@@ -44,7 +44,7 @@
     "@rollup/plugin-node-resolve": "^11.0.0",
     "@types/babel__core": "^7.1.12",
     "@types/jest": "^26.0.15",
-    "@types/lodash": "^4.14.161",
+    "@types/lodash": "^4.14.167",
     "@wdio/cli": "^6.10.5",
     "@wdio/jasmine-framework": "^6.10.4",
     "@wdio/local-runner": "^6.10.5",
