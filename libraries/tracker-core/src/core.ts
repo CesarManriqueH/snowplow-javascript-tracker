@@ -16,7 +16,7 @@
 import { v4 } from 'uuid';
 
 import { ContextPlugin } from './plugins';
-import { payloadBuilder, PayloadData, PayloadDictionary, isJson } from './payload';
+import { payloadBuilder, PayloadBuilder, Payload, isJson } from './payload';
 import {
   globalContexts,
   pluginContexts,
@@ -30,11 +30,14 @@ import {
  * Interface common for any Self-Describing JSON such as custom context or
  * Self-describing (ex-unstuctured) event
  */
-export interface SelfDescribingJson<T extends Record<string, unknown> = Record<string, unknown>>
-  extends Record<string, string | T> {
+export type SelfDescribingJson<T extends Record<keyof T, unknown> = Record<string, unknown>> = {
   schema: string;
   data: T;
-}
+};
+export type SelfDescribingJsonArray<T extends Record<keyof T, unknown> = Record<string, unknown>> = {
+  schema: string;
+  data: Array<T>;
+};
 
 /**
  * Algebraic datatype representing possible timestamp type choice
@@ -97,14 +100,14 @@ export interface Core {
    *
    * @param dict Adds a new payload dictionary to the existing one
    */
-  addPayloadDict(dict: PayloadDictionary): void;
+  addPayloadDict(dict: Payload): void;
 
   /**
    * Replace payloadPairs with a new dictionary
    *
    * @param dict Resets all current payload pairs with a new dictionary of pairs
    */
-  resetPayloadPairs(dict: PayloadDictionary): void;
+  resetPayloadPairs(dict: Payload): void;
 
   /**
    * Set the tracker version
@@ -205,8 +208,8 @@ export interface Core {
     properties: Record<string, unknown>,
     context?: Array<SelfDescribingJson>,
     tstamp?: Timestamp,
-    afterTrack?: (Payload: PayloadDictionary) => void
-  ) => PayloadData;
+    afterTrack?: (Payload: Payload) => void
+  ) => PayloadBuilder;
 
   /**
    * Log the page view / visit
@@ -225,8 +228,8 @@ export interface Core {
     referrer: string,
     context?: Array<SelfDescribingJson>,
     tstamp?: Timestamp,
-    afterTrack?: (Payload: PayloadDictionary) => void
-  ): PayloadData;
+    afterTrack?: (Payload: Payload) => void
+  ): PayloadBuilder;
 
   /**
    * Log that a user is still viewing a given page
@@ -254,8 +257,8 @@ export interface Core {
     maxYOffset: number,
     context?: Array<SelfDescribingJson>,
     tstamp?: Timestamp,
-    afterTrack?: (Payload: PayloadDictionary) => void
-  ): PayloadData;
+    afterTrack?: (Payload: Payload) => void
+  ): PayloadBuilder;
 
   /**
    * Track a structured event
@@ -278,8 +281,8 @@ export interface Core {
     value?: number,
     context?: Array<SelfDescribingJson>,
     tstamp?: Timestamp,
-    afterTrack?: (Payload: PayloadDictionary) => void
-  ): PayloadData;
+    afterTrack?: (Payload: Payload) => void
+  ): PayloadBuilder;
 
   /**
    * Track an ecommerce transaction
@@ -310,8 +313,8 @@ export interface Core {
     currency?: string,
     context?: Array<SelfDescribingJson>,
     tstamp?: Timestamp,
-    afterTrack?: (Payload: PayloadDictionary) => void
-  ): PayloadData;
+    afterTrack?: (Payload: Payload) => void
+  ): PayloadBuilder;
 
   /**
    * Track an ecommerce transaction item
@@ -338,8 +341,8 @@ export interface Core {
     currency?: string,
     context?: Array<SelfDescribingJson>,
     tstamp?: Timestamp,
-    afterTrack?: (Payload: PayloadDictionary) => void
-  ): PayloadData;
+    afterTrack?: (Payload: Payload) => void
+  ): PayloadBuilder;
 
   /**
    * Track a screen view self describing event
@@ -356,8 +359,8 @@ export interface Core {
     id: string,
     context?: Array<SelfDescribingJson>,
     tstamp?: Timestamp,
-    afterTrack?: (Payload: PayloadDictionary) => void
-  ): PayloadData;
+    afterTrack?: (Payload: Payload) => void
+  ): PayloadBuilder;
 
   /**
    * Log the link or click with the server
@@ -380,8 +383,8 @@ export interface Core {
     elementContent?: string,
     context?: Array<SelfDescribingJson>,
     tstamp?: Timestamp,
-    afterTrack?: (Payload: PayloadDictionary) => void
-  ): PayloadData;
+    afterTrack?: (Payload: Payload) => void
+  ): PayloadBuilder;
 
   /**
    * Track an ad being served
@@ -410,8 +413,8 @@ export interface Core {
     campaignId: string,
     context?: Array<SelfDescribingJson>,
     tstamp?: Timestamp,
-    afterTrack?: (Payload: PayloadDictionary) => void
-  ): PayloadData;
+    afterTrack?: (Payload: Payload) => void
+  ): PayloadBuilder;
 
   /**
    * Track an ad being clicked
@@ -442,8 +445,8 @@ export interface Core {
     campaignId: string,
     context?: Array<SelfDescribingJson>,
     tstamp?: Timestamp,
-    afterTrack?: (Payload: PayloadDictionary) => void
-  ): PayloadData;
+    afterTrack?: (Payload: Payload) => void
+  ): PayloadBuilder;
 
   /**
    * Track an ad conversion event
@@ -474,8 +477,8 @@ export interface Core {
     campaignId: string,
     context?: Array<SelfDescribingJson>,
     tstamp?: Timestamp,
-    afterTrack?: (Payload: PayloadDictionary) => void
-  ): PayloadData;
+    afterTrack?: (Payload: Payload) => void
+  ): PayloadBuilder;
 
   /**
    * Track a social event
@@ -494,8 +497,8 @@ export interface Core {
     target: string,
     context?: Array<SelfDescribingJson>,
     tstamp?: Timestamp,
-    afterTrack?: (Payload: PayloadDictionary) => void
-  ): PayloadData;
+    afterTrack?: (Payload: Payload) => void
+  ): PayloadBuilder;
 
   /**
    * Track an add-to-cart event
@@ -520,8 +523,8 @@ export interface Core {
     currency?: string,
     context?: Array<SelfDescribingJson>,
     tstamp?: Timestamp,
-    afterTrack?: (Payload: PayloadDictionary) => void
-  ): PayloadData;
+    afterTrack?: (Payload: Payload) => void
+  ): PayloadBuilder;
 
   /**
    * Track a remove-from-cart event
@@ -546,8 +549,8 @@ export interface Core {
     currency?: string,
     context?: Array<SelfDescribingJson>,
     tstamp?: Timestamp,
-    afterTrack?: (Payload: PayloadDictionary) => void
-  ): PayloadData;
+    afterTrack?: (Payload: Payload) => void
+  ): PayloadBuilder;
 
   /**
    * Track the value of a form field changing or receiving focus
@@ -574,8 +577,8 @@ export interface Core {
     value: string | null,
     context?: Array<SelfDescribingJson>,
     tstamp?: Timestamp,
-    afterTrack?: (Payload: PayloadDictionary) => void
-  ): PayloadData;
+    afterTrack?: (Payload: Payload) => void
+  ): PayloadBuilder;
 
   /**
    * Track a form submission event
@@ -594,8 +597,8 @@ export interface Core {
     elements: Array<Record<string, unknown>>,
     context?: Array<SelfDescribingJson>,
     tstamp?: Timestamp,
-    afterTrack?: (Payload: PayloadDictionary) => void
-  ): PayloadData;
+    afterTrack?: (Payload: Payload) => void
+  ): PayloadBuilder;
 
   /**
    * Track an internal search event
@@ -615,8 +618,8 @@ export interface Core {
     pageResults: number,
     context?: Array<SelfDescribingJson>,
     tstamp?: Timestamp,
-    afterTrack?: (Payload: PayloadDictionary) => void
-  ): PayloadData;
+    afterTrack?: (Payload: Payload) => void
+  ): PayloadBuilder;
 
   /**
    * Track a consent withdrawn event
@@ -639,8 +642,8 @@ export interface Core {
     description?: string,
     context?: Array<SelfDescribingJson>,
     tstamp?: Timestamp,
-    afterTrack?: (Payload: PayloadDictionary) => void
-  ): PayloadData;
+    afterTrack?: (Payload: Payload) => void
+  ): PayloadBuilder;
 
   /**
    * Track a consent granted event
@@ -663,8 +666,8 @@ export interface Core {
     expiry?: string,
     context?: Array<SelfDescribingJson>,
     tstamp?: Timestamp,
-    afterTrack?: (Payload: PayloadDictionary) => void
-  ): PayloadData;
+    afterTrack?: (Payload: Payload) => void
+  ): PayloadBuilder;
 
   /**
    * Adds contexts globally, contexts added here will be attached to all applicable events
@@ -693,14 +696,14 @@ export interface Core {
  */
 export function trackerCore(
   base64: boolean,
-  callback?: (PayloadData: PayloadData) => void,
+  callback?: (PayloadData: PayloadBuilder) => void,
   plugins?: Array<ContextPlugin>
 ): Core {
   const globalContextsHelper: GlobalContexts = globalContexts();
   const pluginContextsHelper: PluginContexts = pluginContexts(plugins);
 
   // Dictionary of key-value pairs which get added to every payload, e.g. tracker version
-  let payloadPairs: PayloadDictionary = {};
+  let payloadPairs: Payload = {};
 
   // base 64 encoding should default to true
   if (typeof base64 === 'undefined') {
@@ -715,11 +718,10 @@ export function trackerCore(
    * @return A cleaned copy of eventJson
    */
   const removeEmptyProperties = (
-    eventJson: PayloadDictionary,
-    exemptFields?: { [key: string]: boolean }
-  ): PayloadDictionary => {
-    const ret: PayloadDictionary = {};
-    exemptFields = exemptFields || {};
+    eventJson: Record<string, unknown>,
+    exemptFields: { [key: string]: boolean } = {}
+  ): Payload => {
+    const ret: Payload = {};
     for (const k in eventJson) {
       if (exemptFields[k] || (eventJson[k] !== null && typeof eventJson[k] !== 'undefined')) {
         ret[k] = eventJson[k];
@@ -736,7 +738,7 @@ export function trackerCore(
    */
   const completeContexts = (
     contexts?: Array<SelfDescribingJson>
-  ): { schema: string; data: SelfDescribingJson[] } | undefined => {
+  ): SelfDescribingJsonArray<SelfDescribingJson> | undefined => {
     if (contexts && contexts.length) {
       return {
         schema: 'iglu:com.snowplowanalytics.snowplow/contexts/jsonschema/1-0-0',
@@ -752,7 +754,10 @@ export function trackerCore(
    * @param sb PayloadData
    * @param contexts Custom contexts relating to the event
    */
-  const attachGlobalContexts = (sb: PayloadData, contexts?: Array<SelfDescribingJson>): Array<SelfDescribingJson> => {
+  const attachGlobalContexts = (
+    sb: PayloadBuilder,
+    contexts?: Array<SelfDescribingJson>
+  ): Array<SelfDescribingJson> => {
     const applicableContexts: Array<SelfDescribingJson> = globalContextsHelper.getApplicableContexts(sb);
     const returnedContexts: Array<SelfDescribingJson> = [];
     if (contexts && contexts.length) {
@@ -776,11 +781,11 @@ export function trackerCore(
    * @return Payload after the callback is applied
    */
   const track = (
-    sb: PayloadData,
+    sb: PayloadBuilder,
     context?: Array<SelfDescribingJson>,
     tstamp?: Timestamp,
-    afterTrack?: (Payload: PayloadDictionary) => void
-  ): PayloadData => {
+    afterTrack?: (Payload: Payload) => void
+  ): PayloadBuilder => {
     sb.addDict(payloadPairs);
     sb.add('eid', v4());
     const timestamp = getTimestamp(tstamp);
@@ -817,8 +822,8 @@ export function trackerCore(
     properties: Record<string, unknown>,
     context?: Array<SelfDescribingJson>,
     tstamp?: Timestamp,
-    afterTrack?: (Payload: PayloadDictionary) => void
-  ): PayloadData => {
+    afterTrack?: (Payload: Payload) => void
+  ): PayloadBuilder => {
     const sb = payloadBuilder(base64);
     const ueJson = {
       schema: 'iglu:com.snowplowanalytics.snowplow/unstruct_event/jsonschema/1-0-0',
@@ -848,7 +853,7 @@ export function trackerCore(
       base64 = encode;
     },
 
-    addPayloadDict(dict: PayloadDictionary): void {
+    addPayloadDict(dict: Payload): void {
       for (const key in dict) {
         if (Object.prototype.hasOwnProperty.call(dict, key)) {
           payloadPairs[key] = dict[key];
@@ -856,7 +861,7 @@ export function trackerCore(
       }
     },
 
-    resetPayloadPairs(dict: PayloadDictionary): void {
+    resetPayloadPairs(dict: Payload): void {
       payloadPairs = isJson(dict) ? dict : {};
     },
 
@@ -916,8 +921,8 @@ export function trackerCore(
       referrer: string,
       context?: Array<SelfDescribingJson>,
       tstamp?: Timestamp,
-      afterTrack?: (Payload: PayloadDictionary) => void
-    ): PayloadData {
+      afterTrack?: (Payload: Payload) => void
+    ): PayloadBuilder {
       const sb = payloadBuilder(base64);
       sb.add('e', 'pv'); // 'pv' for Page View
       sb.add('url', pageUrl);
@@ -937,17 +942,17 @@ export function trackerCore(
       maxYOffset: number,
       context?: Array<SelfDescribingJson>,
       tstamp?: Timestamp,
-      afterTrack?: (Payload: PayloadDictionary) => void
-    ): PayloadData {
+      afterTrack?: (Payload: Payload) => void
+    ): PayloadBuilder {
       const sb = payloadBuilder(base64);
       sb.add('e', 'pp'); // 'pp' for Page Ping
       sb.add('url', pageUrl);
       sb.add('page', pageTitle);
       sb.add('refr', referrer);
-      sb.add('pp_mix', minXOffset.toString());
-      sb.add('pp_max', maxXOffset.toString());
-      sb.add('pp_miy', minYOffset.toString());
-      sb.add('pp_may', maxYOffset.toString());
+      sb.add('pp_mix', isNaN(minXOffset) ? null : minXOffset.toString());
+      sb.add('pp_max', isNaN(maxXOffset) ? null : maxXOffset.toString());
+      sb.add('pp_miy', isNaN(minYOffset) ? null : minYOffset.toString());
+      sb.add('pp_may', isNaN(maxYOffset) ? null : maxYOffset.toString());
 
       return track(sb, context, tstamp, afterTrack);
     },
@@ -960,8 +965,8 @@ export function trackerCore(
       value?: number,
       context?: Array<SelfDescribingJson>,
       tstamp?: Timestamp,
-      afterTrack?: (Payload: PayloadDictionary) => void
-    ): PayloadData {
+      afterTrack?: (Payload: Payload) => void
+    ): PayloadBuilder {
       const sb = payloadBuilder(base64);
       sb.add('e', 'se'); // 'se' for Structured Event
       sb.add('se_ca', category);
@@ -985,8 +990,8 @@ export function trackerCore(
       currency?: string,
       context?: Array<SelfDescribingJson>,
       tstamp?: Timestamp,
-      afterTrack?: (Payload: PayloadDictionary) => void
-    ): PayloadData {
+      afterTrack?: (Payload: Payload) => void
+    ): PayloadBuilder {
       const sb = payloadBuilder(base64);
       sb.add('e', 'tr'); // 'tr' for Transaction
       sb.add('tr_id', orderId);
@@ -1012,8 +1017,8 @@ export function trackerCore(
       currency?: string,
       context?: Array<SelfDescribingJson>,
       tstamp?: Timestamp,
-      afterTrack?: (Payload: PayloadDictionary) => void
-    ): PayloadData {
+      afterTrack?: (Payload: Payload) => void
+    ): PayloadBuilder {
       const sb = payloadBuilder(base64);
       sb.add('e', 'ti'); // 'tr' for Transaction Item
       sb.add('ti_id', orderId);
@@ -1032,8 +1037,8 @@ export function trackerCore(
       id: string,
       context?: Array<SelfDescribingJson>,
       tstamp?: Timestamp,
-      afterTrack?: (Payload: PayloadDictionary) => void
-    ): PayloadData {
+      afterTrack?: (Payload: Payload) => void
+    ): PayloadBuilder {
       return trackSelfDescribingEvent(
         {
           schema: 'iglu:com.snowplowanalytics.snowplow/screen_view/jsonschema/1-0-0',
@@ -1056,8 +1061,8 @@ export function trackerCore(
       elementContent?: string,
       context?: Array<SelfDescribingJson>,
       tstamp?: Timestamp,
-      afterTrack?: (Payload: PayloadDictionary) => void
-    ): PayloadData {
+      afterTrack?: (Payload: Payload) => void
+    ): PayloadBuilder {
       const eventJson = {
         schema: 'iglu:com.snowplowanalytics.snowplow/link_click/jsonschema/1-0-1',
         data: removeEmptyProperties({
@@ -1083,8 +1088,8 @@ export function trackerCore(
       campaignId: string,
       context?: Array<SelfDescribingJson>,
       tstamp?: Timestamp,
-      afterTrack?: (Payload: PayloadDictionary) => void
-    ): PayloadData {
+      afterTrack?: (Payload: Payload) => void
+    ): PayloadBuilder {
       const eventJson = {
         schema: 'iglu:com.snowplowanalytics.snowplow/ad_impression/jsonschema/1-0-0',
         data: removeEmptyProperties({
@@ -1114,8 +1119,8 @@ export function trackerCore(
       campaignId: string,
       context?: Array<SelfDescribingJson>,
       tstamp?: Timestamp,
-      afterTrack?: (Payload: PayloadDictionary) => void
-    ): PayloadData {
+      afterTrack?: (Payload: Payload) => void
+    ): PayloadBuilder {
       const eventJson = {
         schema: 'iglu:com.snowplowanalytics.snowplow/ad_click/jsonschema/1-0-0',
         data: removeEmptyProperties({
@@ -1146,8 +1151,8 @@ export function trackerCore(
       campaignId: string,
       context?: Array<SelfDescribingJson>,
       tstamp?: Timestamp,
-      afterTrack?: (Payload: PayloadDictionary) => void
-    ): PayloadData {
+      afterTrack?: (Payload: Payload) => void
+    ): PayloadBuilder {
       const eventJson = {
         schema: 'iglu:com.snowplowanalytics.snowplow/ad_conversion/jsonschema/1-0-0',
         data: removeEmptyProperties({
@@ -1172,8 +1177,8 @@ export function trackerCore(
       target: string,
       context?: Array<SelfDescribingJson>,
       tstamp?: Timestamp,
-      afterTrack?: (Payload: PayloadDictionary) => void
-    ): PayloadData {
+      afterTrack?: (Payload: Payload) => void
+    ): PayloadBuilder {
       const eventJson = {
         schema: 'iglu:com.snowplowanalytics.snowplow/social_interaction/jsonschema/1-0-0',
         data: removeEmptyProperties({
@@ -1195,8 +1200,8 @@ export function trackerCore(
       currency?: string,
       context?: Array<SelfDescribingJson>,
       tstamp?: Timestamp,
-      afterTrack?: (Payload: PayloadDictionary) => void
-    ): PayloadData {
+      afterTrack?: (Payload: Payload) => void
+    ): PayloadBuilder {
       return trackSelfDescribingEvent(
         {
           schema: 'iglu:com.snowplowanalytics.snowplow/add_to_cart/jsonschema/1-0-0',
@@ -1224,8 +1229,8 @@ export function trackerCore(
       currency?: string,
       context?: Array<SelfDescribingJson>,
       tstamp?: Timestamp,
-      afterTrack?: (Payload: PayloadDictionary) => void
-    ): PayloadData {
+      afterTrack?: (Payload: Payload) => void
+    ): PayloadBuilder {
       return trackSelfDescribingEvent(
         {
           schema: 'iglu:com.snowplowanalytics.snowplow/remove_from_cart/jsonschema/1-0-0',
@@ -1254,10 +1259,10 @@ export function trackerCore(
       value: string | null,
       context?: Array<SelfDescribingJson>,
       tstamp?: Timestamp,
-      afterTrack?: (Payload: PayloadDictionary) => void
-    ): PayloadData {
+      afterTrack?: (Payload: Payload) => void
+    ): PayloadBuilder {
       let event_schema = '';
-      const event_data: PayloadDictionary = { formId, elementId, nodeName, elementClasses, value };
+      const event_data: Payload = { formId, elementId, nodeName, elementClasses, value };
       if (schema === 'change_form') {
         event_schema = 'iglu:com.snowplowanalytics.snowplow/change_form/jsonschema/1-0-0';
         event_data.type = type;
@@ -1279,11 +1284,11 @@ export function trackerCore(
     trackFormSubmission(
       formId: string,
       formClasses: Array<string>,
-      elements: Array<Record<string, unknown>>,
+      elements: Array<Record<string, { name: string; value: string | null; nodeName: string; type?: string }>>,
       context?: Array<SelfDescribingJson>,
       tstamp?: Timestamp,
-      afterTrack?: (Payload: PayloadDictionary) => void
-    ): PayloadData {
+      afterTrack?: (Payload: Payload) => void
+    ): PayloadBuilder {
       return trackSelfDescribingEvent(
         {
           schema: 'iglu:com.snowplowanalytics.snowplow/submit_form/jsonschema/1-0-0',
@@ -1306,8 +1311,8 @@ export function trackerCore(
       pageResults: number,
       context?: Array<SelfDescribingJson>,
       tstamp?: Timestamp,
-      afterTrack?: (Payload: PayloadDictionary) => void
-    ): PayloadData {
+      afterTrack?: (Payload: Payload) => void
+    ): PayloadBuilder {
       return trackSelfDescribingEvent(
         {
           schema: 'iglu:com.snowplowanalytics.snowplow/site_search/jsonschema/1-0-0',
@@ -1332,8 +1337,8 @@ export function trackerCore(
       description?: string,
       context?: Array<SelfDescribingJson>,
       tstamp?: Timestamp,
-      afterTrack?: (Payload: PayloadDictionary) => void
-    ): PayloadData {
+      afterTrack?: (Payload: Payload) => void
+    ): PayloadBuilder {
       const documentJson = {
         schema: 'iglu:com.snowplowanalytics.snowplow/consent_document/jsonschema/1-0-0',
         data: removeEmptyProperties({
@@ -1365,8 +1370,8 @@ export function trackerCore(
       expiry?: string,
       context?: Array<SelfDescribingJson>,
       tstamp?: Timestamp,
-      afterTrack?: (Payload: PayloadDictionary) => void
-    ): PayloadData {
+      afterTrack?: (Payload: Payload) => void
+    ): PayloadBuilder {
       const documentJson = {
         schema: 'iglu:com.snowplowanalytics.snowplow/consent_document/jsonschema/1-0-0',
         data: removeEmptyProperties({

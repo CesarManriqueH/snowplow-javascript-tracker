@@ -41,7 +41,16 @@ import {
   attemptWriteSessionStorage,
   attemptGetSessionStorage,
   localStorageAccessible,
+  SharedState,
 } from '@snowplow/browser-core';
+import { Payload } from '@snowplow/tracker-core';
+
+interface OutQueue {
+  enqueueRequest: (request: Payload, url: string) => void;
+  executeQueue: () => void;
+  setUseLocalStorage: (localStorage: boolean) => void;
+  setAnonymousTracking: (anonymous: boolean) => void;
+}
 
 /**
  * Object handling sending events to a collector.
@@ -63,29 +72,34 @@ import {
  * @return object OutQueueManager instance
  */
 export function OutQueueManager(
-  functionName,
-  namespace,
-  mutSnowplowState,
-  useLocalStorage,
-  eventMethod,
-  postPath,
-  bufferSize,
-  maxPostBytes,
-  useStm,
-  maxLocalStorageQueueSize,
-  connectionTimeout,
-  anonymousTracking
-) {
+  functionName: string,
+  namespace: string,
+  mutSnowplowState: SharedState,
+  useLocalStorage: boolean,
+  eventMethod: string | boolean | null,
+  postPath: string,
+  bufferSize: number,
+  maxPostBytes: number,
+  useStm: boolean,
+  maxLocalStorageQueueSize: number,
+  connectionTimeout: number,
+  anonymousTracking: boolean
+): OutQueue {
+  type PostEvent = {
+    evt: Record<string, unknown>;
+    bytes: number;
+  };
+
   var localStorageAlias = window.localStorage,
-    queueName,
+    queueName: string,
     executingQueue = false,
-    configCollectorUrl,
-    outQueue,
-    preflightName,
-    beaconPreflight;
+    configCollectorUrl: string,
+    outQueue: Array<PostEvent> | Array<string> = [],
+    preflightName: string,
+    beaconPreflight: boolean;
 
   //Force to lower case if its a string
-  eventMethod = eventMethod.toLowerCase ? eventMethod.toLowerCase() : eventMethod;
+  eventMethod = typeof eventMethod === 'string' ? eventMethod.toLowerCase() : eventMethod;
 
   // Use the Beacon API if eventMethod is set null, true, or 'beacon'.
   var isBeaconRequested =
@@ -116,7 +130,8 @@ export function OutQueueManager(
   if (useLocalStorage) {
     // Catch any JSON parse errors or localStorage that might be thrown
     try {
-      outQueue = JSON.parse(localStorageAlias.getItem(queueName));
+      const localStorageQueue = localStorageAlias.getItem(queueName);
+      outQueue = localStorageQueue ? JSON.parse(localStorageQueue) : [];
     } catch (e) {}
   }
 
@@ -140,25 +155,25 @@ export function OutQueueManager(
    * Convert a dictionary to a querystring
    * The context field is the last in the querystring
    */
-  function getQuerystring(request) {
-    var querystring = '?',
+  function getQuerystring(request: Payload) {
+    let querystring = '?',
       lowPriorityKeys = { co: true, cx: true },
       firstPair = true;
 
-    for (var key in request) {
+    for (const key in request) {
       if (request.hasOwnProperty(key) && !lowPriorityKeys.hasOwnProperty(key)) {
         if (!firstPair) {
           querystring += '&';
         } else {
           firstPair = false;
         }
-        querystring += encodeURIComponent(key) + '=' + encodeURIComponent(request[key]);
+        querystring += encodeURIComponent(key) + '=' + encodeURIComponent(request[key] as string | number | boolean);
       }
     }
 
-    for (var contextKey in lowPriorityKeys) {
+    for (const contextKey in lowPriorityKeys) {
       if (request.hasOwnProperty(contextKey) && lowPriorityKeys.hasOwnProperty(contextKey)) {
-        querystring += '&' + contextKey + '=' + encodeURIComponent(request[contextKey]);
+        querystring += '&' + contextKey + '=' + encodeURIComponent(request[contextKey] as string | number | boolean);
       }
     }
 
@@ -168,8 +183,8 @@ export function OutQueueManager(
   /*
    * Convert numeric fields to strings to match payload_data schema
    */
-  function getBody(request) {
-    var cleanedRequest = mapValues(request, function (v) {
+  function getBody(request: Payload): PostEvent {
+    var cleanedRequest = mapValues(request, function (v: Object) {
       return v.toString();
     });
     return {
@@ -185,7 +200,7 @@ export function OutQueueManager(
    * @param string s
    * @return number Length of s in bytes when UTF-8 encoded
    */
-  function getUTF8Length(s) {
+  function getUTF8Length(s: string) {
     var len = 0;
     for (var i = 0; i < s.length; i++) {
       var code = s.charCodeAt(i);
@@ -207,11 +222,15 @@ export function OutQueueManager(
     return len;
   }
 
+  const postable = (queue: Array<PostEvent> | Array<string>): queue is Array<PostEvent> => {
+    return typeof queue[0] === 'object';
+  };
+
   /*
    * Queue an image beacon for submission to the collector.
    * If we're not processing the queue, we'll start.
    */
-  function enqueueRequest(request, url) {
+  function enqueueRequest(request: Payload, url: string) {
     configCollectorUrl = url + path;
     if (usePost) {
       var body = getBody(request);
@@ -221,10 +240,10 @@ export function OutQueueManager(
         xhr.send(encloseInPayloadDataEnvelope(attachStmToEvent([body.evt])));
         return;
       } else {
-        outQueue.push(body);
+        (outQueue as Array<PostEvent>).push(body);
       }
     } else {
-      outQueue.push(getQuerystring(request));
+      (outQueue as Array<string>).push(getQuerystring(request));
     }
     var savedToLocalStorage = false;
     if (useLocalStorage) {
@@ -261,13 +280,11 @@ export function OutQueueManager(
 
     executingQueue = true;
 
-    var nextRequest = outQueue[0];
-
     if (useXhr) {
       // Keep track of number of events to delete from queue
-      function chooseHowManyToSend(queue) {
-        var numberToSend = 0;
-        var byteCount = 0;
+      const chooseHowManyToSend = (queue: Array<{ bytes: number }>) => {
+        let numberToSend = 0,
+          byteCount = 0;
         while (numberToSend < queue.length) {
           byteCount += queue[numberToSend].bytes;
           if (byteCount >= maxPostBytes) {
@@ -277,28 +294,28 @@ export function OutQueueManager(
           }
         }
         return numberToSend;
-      }
+      };
 
-      var url, xhr, numberToSend;
-      if (isGetRequested) {
-        url = createGetUrl(nextRequest);
-        xhr = initializeXMLHttpRequest(url, false);
-        numberToSend = 1;
-      } else {
+      let url: string, xhr: XMLHttpRequest, numberToSend: number;
+      if (postable(outQueue)) {
         url = configCollectorUrl;
         xhr = initializeXMLHttpRequest(url, true);
         numberToSend = chooseHowManyToSend(outQueue);
+      } else {
+        url = createGetUrl(outQueue[0]);
+        xhr = initializeXMLHttpRequest(url, false);
+        numberToSend = 1;
       }
 
       // Time out POST requests after connectionTimeout
-      var xhrTimeout = setTimeout(function () {
+      const xhrTimeout = setTimeout(function () {
         xhr.abort();
         executingQueue = false;
       }, connectionTimeout);
 
       // The events (`numberToSend` of them), have been sent, so we remove them from the outQueue
       // We also call executeQueue() again, to let executeQueue() check if we should keep running through the queue
-      function onPostSuccess(numberToSend) {
+      const onPostSuccess = (numberToSend: number): void => {
         for (var deleteCount = 0; deleteCount < numberToSend; deleteCount++) {
           outQueue.shift();
         }
@@ -306,13 +323,13 @@ export function OutQueueManager(
           attemptWriteLocalStorage(queueName, JSON.stringify(outQueue.slice(0, maxLocalStorageQueueSize)));
         }
         executeQueue();
-      }
+      };
 
       xhr.onreadystatechange = function () {
         if (xhr.readyState === 4 && xhr.status >= 200 && xhr.status < 400) {
           clearTimeout(xhrTimeout);
           if (useBeacon && !beaconPreflight) {
-            attemptWriteSessionStorage(preflightName, true);
+            attemptWriteSessionStorage(preflightName, '*');
           }
           onPostSuccess(numberToSend);
         } else if (xhr.readyState === 4 && xhr.status >= 400) {
@@ -321,18 +338,18 @@ export function OutQueueManager(
         }
       };
 
-      if (isGetRequested) {
+      if (!postable(outQueue)) {
         xhr.send();
       } else {
-        var batch = outQueue.slice(0, numberToSend);
+        let batch = outQueue.slice(0, numberToSend);
 
         if (batch.length > 0) {
-          var beaconStatus;
+          let beaconStatus = false;
 
           //If using Beacon, check we have sent at least one request using POST as Safari doesn't preflight Beacon
-          beaconPreflight = beaconPreflight || (useBeacon && attemptGetSessionStorage(preflightName));
+          beaconPreflight = beaconPreflight || (useBeacon && !!attemptGetSessionStorage(preflightName));
 
-          var eventBatch = map(batch, function (x) {
+          const eventBatch = map(batch, function (x) {
             return x.evt;
           });
 
@@ -355,9 +372,9 @@ export function OutQueueManager(
           }
         }
       }
-    } else if (!anonymousTracking) {
-      var image = new Image(1, 1);
-      var loading = true;
+    } else if (!anonymousTracking && !postable(outQueue)) {
+      let image = new Image(1, 1),
+        loading = true;
 
       image.onload = function () {
         if (!loading) return;
@@ -375,7 +392,7 @@ export function OutQueueManager(
         executingQueue = false;
       };
 
-      image.src = createGetUrl(nextRequest);
+      image.src = createGetUrl(outQueue[0]);
 
       setTimeout(function () {
         if (loading && executingQueue) {
@@ -394,7 +411,7 @@ export function OutQueueManager(
    * @param string url The destination URL
    * @return object The XMLHttpRequest
    */
-  function initializeXMLHttpRequest(url, post) {
+  function initializeXMLHttpRequest(url: string, post: boolean) {
     var xhr = new XMLHttpRequest();
     if (post) {
       xhr.open('POST', url, true);
@@ -415,7 +432,7 @@ export function OutQueueManager(
    * @param array events Batch of events
    * @return string payload_data self-describing JSON
    */
-  function encloseInPayloadDataEnvelope(events) {
+  function encloseInPayloadDataEnvelope(events: Array<Record<string, unknown>>) {
     return JSON.stringify({
       schema: 'iglu:com.snowplowanalytics.snowplow/payload_data/jsonschema/1-0-4',
       data: events,
@@ -427,7 +444,7 @@ export function OutQueueManager(
    *
    * @param events the events to attach the STM to
    */
-  function attachStmToEvent(events) {
+  function attachStmToEvent(events: Array<Record<string, unknown>>) {
     var stm = new Date().getTime().toString();
     for (var i = 0; i < events.length; i++) {
       events[i]['stm'] = stm;
@@ -440,7 +457,7 @@ export function OutQueueManager(
    *
    * @param nextRequest the query string of the next request
    */
-  function createGetUrl(nextRequest) {
+  function createGetUrl(nextRequest: string) {
     if (useStm) {
       return configCollectorUrl + nextRequest.replace('?', '?stm=' + new Date().getTime() + '&');
     }
@@ -455,10 +472,10 @@ export function OutQueueManager(
         executeQueue();
       }
     },
-    setUseLocalStorage: (localStorage) => {
+    setUseLocalStorage: (localStorage: boolean) => {
       useLocalStorage = localStorage;
     },
-    setAnonymousTracking: (anonymous) => {
+    setAnonymousTracking: (anonymous: boolean) => {
       anonymousTracking = anonymous;
     },
   };

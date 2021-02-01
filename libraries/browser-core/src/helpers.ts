@@ -101,7 +101,7 @@ export function fixupDomain(domain: string) {
  * @param string oldLocation Optional.
  * @return string The referrer
  */
-export function getReferrer(oldLocation: string) {
+export function getReferrer(oldLocation?: string) {
   var referrer = '';
 
   var fromQs =
@@ -141,10 +141,10 @@ export function addEventListener(
   element: EventTarget,
   eventType: string,
   eventHandler: EventListenerOrEventListenerObject,
-  useCapture?: boolean
+  options?: boolean | AddEventListenerOptions
 ) {
   if (element.addEventListener) {
-    element.addEventListener(eventType, eventHandler, useCapture);
+    element.addEventListener(eventType, eventHandler, options);
     return true;
   }
 
@@ -543,8 +543,8 @@ export function cookie(
  * @param obj The object to parse
  * @return the result of the parse operation
  */
-export function parseAndValidateInt(obj: string) {
-  var result = parseInt(obj);
+export function parseAndValidateInt(obj: unknown) {
+  var result = parseInt(obj as string);
   return isNaN(result) ? undefined : result;
 }
 
@@ -555,12 +555,12 @@ export function parseAndValidateInt(obj: string) {
  * @param obj The object to parse
  * @return the result of the parse operation
  */
-export function parseAndValidateFloat(obj: string) {
-  var result = parseFloat(obj);
+export function parseAndValidateFloat(obj: unknown) {
+  var result = parseFloat(obj as string);
   return isNaN(result) ? undefined : result;
 }
 
-export function isFunction(func: any) {
+export function isFunction(func: unknown) {
   if (func && typeof func === 'function') {
     return true;
   }

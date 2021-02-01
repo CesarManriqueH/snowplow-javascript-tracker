@@ -1,10 +1,10 @@
 import test, { ExecutionContext } from 'ava';
 import { trackerCore } from '../../src/core';
-import { PayloadData, PayloadDictionary } from '../../src/payload';
+import { PayloadBuilder, Payload } from '../../src/payload';
 
 const selfDescribingEventSchema = 'iglu:com.snowplowanalytics.snowplow/unstruct_event/jsonschema/1-0-0';
 const tracker = trackerCore(false);
-function compare(result: PayloadData, expected: PayloadDictionary, t: ExecutionContext) {
+function compare(result: PayloadBuilder, expected: Payload, t: ExecutionContext) {
   const res = result.build();
   t.truthy(res['eid'], 'A UUID should be attached to all events');
   delete res['eid'];

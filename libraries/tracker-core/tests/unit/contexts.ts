@@ -15,7 +15,7 @@
 
 import test from 'ava';
 import * as contexts from '../../src/contexts';
-import { payloadBuilder, PayloadDictionary } from '../../src/payload';
+import { payloadBuilder, Payload } from '../../src/payload';
 import { SelfDescribingJson } from '../../src/core';
 
 test('Identify context primitives', (t) => {
@@ -319,7 +319,7 @@ test('Get applicable contexts', (t) => {
     [geolocationContext, eventTypeContextGenerator],
   ];
 
-  const eventJson: PayloadDictionary = {
+  const eventJson: Payload = {
     e: 'ue',
     ue_px: {
       schema: 'iglu:com.snowplowanalytics.snowplow/unstruct_event/jsonschema/1-0-0',
@@ -334,7 +334,7 @@ test('Get applicable contexts', (t) => {
   const event = payloadBuilder(false);
   for (const property in eventJson) {
     if (Object.prototype.hasOwnProperty.call(eventJson, property)) {
-      event.add(property, eventJson[property] as string);
+      event.add(property, eventJson[property]);
     }
   }
 

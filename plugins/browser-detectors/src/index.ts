@@ -33,7 +33,7 @@
  */
 
 import { determine } from 'jstimezonedetect';
-import { Core, PayloadData } from '@snowplow/tracker-core';
+import { Core, PayloadBuilder } from '@snowplow/tracker-core';
 import isUndefined from 'lodash/isUndefined';
 import { isFunction, detectDocumentSize, detectViewport } from '@snowplow/browser-core';
 
@@ -86,7 +86,7 @@ export function DetectScreen() {
  * Detect features that are available in this browser
  */
 export function DetectWindow() {
-  return (payload: PayloadData) => {
+  return (payload: PayloadBuilder) => {
     // Other browser features
     payload.add('vp', detectViewport());
     payload.add('ds', detectDocumentSize());

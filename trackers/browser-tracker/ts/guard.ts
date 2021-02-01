@@ -1,5 +1,5 @@
 /*
- * JavaScript tracker for Snowplow: init.js
+ * JavaScript tracker for Snowplow: tracker.js
  *
  * Significant portions copyright 2010 Anthon Pang. Remainder copyright
  * 2012-2020 Snowplow Analytics Ltd. All rights reserved.
@@ -32,17 +32,26 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-// Snowplow Asynchronous Queue
+import { TrackerApi } from './tracker';
 
-/*
- * Get the name of the global input function
- */
+const makeSafe = function (fn: Function) {
+  return function () {
+    try {
+      return fn.apply(this, arguments);
+    } catch (ex) {
+      // TODO: Debug mode
+    }
+  };
+};
 
-import { InQueueManager } from './in_queue';
-
-const windowAlias = window,
-  functionName = windowAlias.GlobalSnowplowNamespace.shift(),
-  queue = windowAlias[functionName];
-
-// Now replace initialization array with queue manager object
-queue.q = new InQueueManager(functionName, queue.q);
+export function productionize(methods: TrackerApi) {
+  let safeMethods: Record<string, Function> = {};
+  if (typeof methods === 'object' && methods !== null) {
+    Object.getOwnPropertyNames(methods).forEach(function (val, _idx, _array) {
+      if (typeof methods[val] === 'function') {
+        safeMethods[val] = makeSafe(methods[val]);
+      }
+    });
+  }
+  return safeMethods as TrackerApi;
+}

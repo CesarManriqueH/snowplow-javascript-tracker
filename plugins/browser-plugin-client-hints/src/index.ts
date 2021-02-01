@@ -24,7 +24,7 @@ declare global {
   }
 }
 
-const ClientHintsPlugin = (includeHighEntropy: true): ContextPlugin => {
+const ClientHintsPlugin = (includeHighEntropy: boolean): ContextPlugin => {
   const navigatorAlias = navigator;
   var uaClientHints: HttpClientHints;
 

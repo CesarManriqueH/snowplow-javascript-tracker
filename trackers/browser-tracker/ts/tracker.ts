@@ -52,14 +52,748 @@ import {
   cookie,
   deleteCookie,
   fixupUrl,
-  detectViewport,
-  detectDocumentSize,
+  SharedState,
+  ApiMethods,
+  BrowserApiPlugin,
 } from '@snowplow/browser-core';
 import sha1 from 'sha1';
-import uuid from 'uuid/v4';
+import { v4 as uuid } from 'uuid';
 import { OutQueueManager } from './out_queue';
 import { productionize } from './guard';
-import { trackerCore } from '@snowplow/tracker-core';
+import {
+  ConditionalContextProvider,
+  ContextPrimitive,
+  PayloadBuilder,
+  Payload,
+  SelfDescribingJson,
+  Timestamp,
+  trackerCore,
+} from '@snowplow/tracker-core';
+
+type ActivityConfig = {
+  callback: (obj: any) => void;
+  configMinimumVisitLength: number;
+  configHeartBeatTimer: number;
+  activityInterval?: number;
+};
+
+type ActivityCallbackData = {
+  context: Array<SelfDescribingJson>;
+  pageViewId: string;
+  minXOffset: number;
+  minYOffset: number;
+  maxXOffset: number;
+  maxYOffset: number;
+};
+
+type AcitivtyCallback = {
+  (data: ActivityCallbackData): void;
+};
+
+type ActivityConfigurations = {
+  callback?: ActivityConfig;
+  pagePing?: ActivityConfig;
+};
+
+type ActivityTrackingConfig = {
+  enabled: boolean;
+  installed: boolean;
+  configurations: ActivityConfigurations;
+};
+
+type AnonymousTrackingOptions = boolean & {
+  anonymousTracking: { withSessionTracking?: boolean; withServerAnonymisation?: boolean };
+};
+
+export type TrackerApi = {
+  [key: string]: Function;
+
+  /**
+   * Get the domain session index also known as current memorized visit count.
+   *
+   * @return int Domain session index
+   */
+  getDomainSessionIndex: () => void;
+
+  /**
+   * Get the page view ID as generated or provided by mutSnowplowState.pageViewId.
+   *
+   * @return string Page view ID
+   */
+  getPageViewId: () => void;
+
+  /**
+   * Expires current session and starts a new session.
+   */
+  newSession: () => void;
+
+  /**
+   * Get the cookie name as cookieNamePrefix + basename + . + domain.
+   *
+   * @return string Cookie name
+   */
+  getCookieName: (basename: string) => void;
+
+  /**
+   * Get the current user ID (as set previously
+   * with setUserId()).
+   *
+   * @return string Business-defined user ID
+   */
+  getUserId: () => void;
+
+  /**
+   * Get visitor ID (from first party cookie)
+   *
+   * @return string Visitor ID in hexits (or null, if not yet known)
+   */
+  getDomainUserId: () => void;
+
+  /**
+   * Get the visitor information (from first party cookie)
+   *
+   * @return array
+   */
+  getDomainUserInfo: () => void;
+
+  /**
+   * Override referrer
+   *
+   * @param string url
+   */
+  setReferrerUrl: (url: string) => void;
+
+  /**
+   * Override url
+   *
+   * @param string url
+   */
+  setCustomUrl: (url: string) => void;
+
+  /**
+   * Override document.title
+   *
+   * @param string title
+   */
+  setDocumentTitle: (title: string) => void;
+
+  /**
+   * Strip hash tag (or anchor) from URL
+   *
+   * @param bool enableFilter
+   */
+  discardHashTag: (enableFilter: boolean) => void;
+
+  /**
+   * Strip braces from URL
+   *
+   * @param bool enableFilter
+   */
+  discardBrace: (enableFilter: boolean) => void;
+
+  /**
+   * Set first-party cookie path
+   *
+   * @param string domain
+   */
+  setCookiePath: (path: string) => void;
+
+  /**
+   * Set visitor cookie timeout (in seconds)
+   *
+   * @param int timeout
+   */
+  setVisitorCookieTimeout: (timeout: number) => void;
+
+  /**
+   * Enable querystring decoration for links pasing a filter
+   *
+   * @param function crossDomainLinker Function used to determine which links to decorate
+   */
+  crossDomainLinker: (crossDomainLinkerCriterion: (elt: HTMLAnchorElement | HTMLAreaElement) => boolean) => void;
+
+  /**
+   * Enables page activity tracking (sends page
+   * pings to the Collector regularly).
+   *
+   * @param int minimumVisitLength Seconds to wait before sending first page ping
+   * @param int heartBeatDelay Seconds to wait between pings
+   */
+  enableActivityTracking: (minimumVisitLength: number, heartBeatDelay: number) => void;
+
+  /**
+   * Enables page activity tracking (replaces collector ping with callback).
+   *
+   * @param int minimumVisitLength Seconds to wait before sending first page ping
+   * @param int heartBeatDelay Seconds to wait between pings
+   * @param function callback function called with ping data
+   */
+  enableActivityTrackingCallback: (
+    minimumVisitLength: number,
+    heartBeatDelay: number,
+    callback: AcitivtyCallback
+  ) => void;
+
+  /**
+   * Triggers the activityHandler manually to allow external user defined
+   * activity. i.e. While watching a video
+   */
+  updatePageActivity: () => void;
+
+  /**
+   * Sets the opt out cookie.
+   *
+   * @param string name of the opt out cookie
+   */
+  setOptOutCookie: (name: string) => void;
+
+  /**
+   * Set the business-defined user ID for this user.
+   *
+   * @param string userId The business-defined user ID
+   */
+  setUserId: (userId: string) => void;
+
+  /**
+   * Alias for setUserId.
+   *
+   * @param string userId The business-defined user ID
+   */
+  identifyUser: (userId: string) => void;
+
+  /**
+   * Set the business-defined user ID for this user using the location querystring.
+   *
+   * @param string queryName Name of a querystring name-value pair
+   */
+  setUserIdFromLocation: (querystringField: string) => void;
+
+  /**
+   * Set the business-defined user ID for this user using the referrer querystring.
+   *
+   * @param string queryName Name of a querystring name-value pair
+   */
+  setUserIdFromReferrer: (querystringField: string) => void;
+
+  /**
+   * Set the business-defined user ID for this user to the value of a cookie.
+   *
+   * @param string cookieName Name of the cookie whose value will be assigned to businessUserId
+   */
+  setUserIdFromCookie: (cookieName: string) => void;
+
+  /**
+   *
+   * Specify the Snowplow collector URL. No need to include HTTP
+   * or HTTPS - we will add this.
+   *
+   * @param string rawUrl The collector URL minus protocol and /i
+   */
+  setCollectorUrl: (rawUrl: string) => void;
+
+  /**
+   * Send all events in the outQueue
+   * Use only when sending POSTs with a bufferSize of at least 2
+   */
+  flushBuffer: () => void;
+
+  /**
+   * Log visit to this page
+   *
+   * @param string customTitle
+   * @param object Custom context relating to the event
+   * @param object contextCallback Function returning an array of contexts
+   * @param tstamp number or Timestamp object
+   * @param function afterTrack (optional) A callback function triggered after event is tracked
+   */
+  trackPageView: (
+    customTitle: string,
+    context: Array<SelfDescribingJson>,
+    contextCallback: () => Array<SelfDescribingJson>,
+    tstamp: Timestamp,
+    afterTrack: (payload: Payload) => void
+  ) => void;
+
+  /**
+   * Track a structured event happening on this page.
+   *
+   * Replaces trackEvent, making clear that the type
+   * of event being tracked is a structured one.
+   *
+   * @param string category The name you supply for the group of objects you want to track
+   * @param string action A string that is uniquely paired with each category, and commonly used to define the type of user interaction for the web object
+   * @param string label (optional) An optional string to provide additional dimensions to the event data
+   * @param string property (optional) Describes the object or the action performed on it, e.g. quantity of item added to basket
+   * @param int|float|string value (optional) An integer that you can use to provide numerical data about the user event
+   * @param object context (optional) Custom context relating to the event
+   * @param number|Timestamp tstamp (optional) TrackerTimestamp of the event
+   * @param function afterTrack (optional) A callback function triggered after event is tracked
+   */
+  trackStructEvent: (
+    category: string,
+    action: string,
+    label: string,
+    property: string,
+    value: number,
+    context: Array<SelfDescribingJson>,
+    tstamp: Timestamp,
+    afterTrack: (payload: Payload) => void
+  ) => void;
+
+  /**
+   * Track a self-describing event happening on this page.
+   *
+   * @param object eventJson Contains the properties and schema location for the event
+   * @param object context Custom context relating to the event
+   * @param tstamp number or Timestamp object
+   * @param function afterTrack (optional) A callback function triggered after event is tracked
+   */
+  trackSelfDescribingEvent: (
+    eventJson: SelfDescribingJson,
+    context: Array<SelfDescribingJson>,
+    tstamp: Timestamp,
+    afterTrack: (payload: Payload) => void
+  ) => void;
+
+  /**
+   * Track an ecommerce transaction
+   *
+   * @param string orderId Required. Internal unique order id number for this transaction.
+   * @param string affiliation Optional. Partner or store affiliation.
+   * @param string total Required. Total amount of the transaction.
+   * @param string tax Optional. Tax amount of the transaction.
+   * @param string shipping Optional. Shipping charge for the transaction.
+   * @param string city Optional. City to associate with transaction.
+   * @param string state Optional. State to associate with transaction.
+   * @param string country Optional. Country to associate with transaction.
+   * @param string currency Optional. Currency to associate with this transaction.
+   * @param object context Optional. Context relating to the event.
+   * @param tstamp number or Timestamp object
+   */
+  addTrans: (
+    orderId: string,
+    affiliation: string,
+    total: string,
+    tax: string,
+    shipping: string,
+    city: string,
+    state: string,
+    country: string,
+    currency: string,
+    context: Array<SelfDescribingJson>,
+    tstamp: Timestamp
+  ) => void;
+
+  /**
+   * Track an ecommerce transaction item
+   *
+   * @param string orderId Required Order ID of the transaction to associate with item.
+   * @param string sku Required. Item's SKU code.
+   * @param string name Optional. Product name.
+   * @param string category Optional. Product category.
+   * @param string price Required. Product price.
+   * @param string quantity Required. Purchase quantity.
+   * @param string currency Optional. Product price currency.
+   * @param object context Optional. Context relating to the event.
+   * @param tstamp number or Timestamp object
+   */
+  addItem: (
+    orderId: string,
+    sku: string,
+    name: string,
+    category: string,
+    price: string,
+    quantity: string,
+    currency: string,
+    context: Array<SelfDescribingJson>,
+    tstamp: Timestamp
+  ) => void;
+
+  /**
+   * Commit the ecommerce transaction
+   *
+   * This call will send the data specified with addTrans,
+   * addItem methods to the tracking server.
+   */
+  trackTrans: () => void;
+
+  /**
+   * Track an ad being served
+   *
+   * @param string impressionId Identifier for a particular ad impression
+   * @param string costModel The cost model. 'cpa', 'cpc', or 'cpm'
+   * @param number cost Cost
+   * @param string bannerId Identifier for the ad banner displayed
+   * @param string zoneId Identifier for the ad zone
+   * @param string advertiserId Identifier for the advertiser
+   * @param string campaignId Identifier for the campaign which the banner belongs to
+   * @param object Custom context relating to the event
+   * @param tstamp number or Timestamp object
+   */
+  trackAdImpression: (
+    impressionId: string,
+    costModel: string,
+    cost: number,
+    targetUrl: string,
+    bannerId: string,
+    zoneId: string,
+    advertiserId: string,
+    campaignId: string,
+    context: Array<SelfDescribingJson>,
+    tstamp: Timestamp
+  ) => void;
+
+  /**
+   * Track an ad being clicked
+   *
+   * @param string clickId Identifier for the ad click
+   * @param string costModel The cost model. 'cpa', 'cpc', or 'cpm'
+   * @param number cost Cost
+   * @param string targetUrl (required) The link's target URL
+   * @param string bannerId Identifier for the ad banner displayed
+   * @param string zoneId Identifier for the ad zone
+   * @param string impressionId Identifier for a particular ad impression
+   * @param string advertiserId Identifier for the advertiser
+   * @param string campaignId Identifier for the campaign which the banner belongs to
+   * @param object Custom context relating to the event
+   * @param tstamp number or Timestamp object
+   */
+  trackAdClick: (
+    targetUrl: string,
+    clickId: string,
+    costModel: string,
+    cost: string,
+    bannerId: string,
+    zoneId: string,
+    impressionId: string,
+    advertiserId: string,
+    campaignId: string,
+    context: Array<SelfDescribingJson>,
+    tstamp: Timestamp
+  ) => void;
+
+  /**
+   * Track an ad conversion event
+   *
+   * @param string conversionId Identifier for the ad conversion event
+   * @param number cost Cost
+   * @param string category The name you supply for the group of objects you want to track
+   * @param string action A string that is uniquely paired with each category
+   * @param string property Describes the object of the conversion or the action performed on it
+   * @param number initialValue Revenue attributable to the conversion at time of conversion
+   * @param string advertiserId Identifier for the advertiser
+   * @param string costModel The cost model. 'cpa', 'cpc', or 'cpm'
+   * @param string campaignId Identifier for the campaign which the banner belongs to
+   * @param object Custom context relating to the event
+   * @param tstamp number or Timestamp object
+   */
+  trackAdConversion: (
+    conversionId: string,
+    costModel: string,
+    cost: number,
+    category: string,
+    action: string,
+    property: string,
+    initialValue: number,
+    advertiserId: string,
+    campaignId: string,
+    context: Array<SelfDescribingJson>,
+    tstamp: Timestamp
+  ) => void;
+
+  /**
+   * Track a social interaction event
+   *
+   * @param string action (required) Social action performed
+   * @param string network (required) Social network
+   * @param string target Object of the social action e.g. the video liked, the tweet retweeted
+   * @param object Custom context relating to the event
+   * @param tstamp number or Timestamp object
+   */
+  trackSocialInteraction: (
+    action: string,
+    network: string,
+    target: string,
+    context: Array<SelfDescribingJson>,
+    tstamp: Timestamp
+  ) => void;
+
+  /**
+   * Track an add-to-cart event
+   *
+   * @param string sku Required. Item's SKU code.
+   * @param string name Optional. Product name.
+   * @param string category Optional. Product category.
+   * @param string unitPrice Optional. Product price.
+   * @param string quantity Required. Quantity added.
+   * @param string currency Optional. Product price currency.
+   * @param array context Optional. Context relating to the event.
+   * @param tstamp number or Timestamp object
+   */
+  trackAddToCart: (
+    sku: string,
+    name: string,
+    category: string,
+    unitPrice: string,
+    quantity: string,
+    currency: string,
+    context: Array<SelfDescribingJson>,
+    tstamp: Timestamp
+  ) => void;
+
+  /**
+   * Track a remove-from-cart event
+   *
+   * @param string sku Required. Item's SKU code.
+   * @param string name Optional. Product name.
+   * @param string category Optional. Product category.
+   * @param string unitPrice Optional. Product price.
+   * @param string quantity Required. Quantity removed.
+   * @param string currency Optional. Product price currency.
+   * @param array context Optional. Context relating to the event.
+   * @param tstamp Opinal number or Timestamp object
+   */
+  trackRemoveFromCart: (
+    sku: string,
+    name: string,
+    category: string,
+    unitPrice: string,
+    quantity: string,
+    currency: string,
+    context: Array<SelfDescribingJson>,
+    tstamp: Timestamp
+  ) => void;
+
+  /**
+   * Track an internal search event
+   *
+   * @param array terms Search terms
+   * @param object filters Search filters
+   * @param number totalResults Number of results
+   * @param number pageResults Number of results displayed on page
+   * @param array context Optional. Context relating to the event.
+   * @param tstamp Opinal number or Timestamp object
+   */
+  trackSiteSearch: (
+    terms: Array<string>,
+    filters: Record<string, unknown>,
+    totalResults: number,
+    pageResults: number,
+    context: Array<SelfDescribingJson>,
+    tstamp: Timestamp
+  ) => void;
+
+  /**
+   * Track a timing event (such as the time taken for a resource to load)
+   *
+   * @param string category Required.
+   * @param string variable Required.
+   * @param number timing Required.
+   * @param string label Optional.
+   * @param array context Optional. Context relating to the event.
+   * @param tstamp Opinal number or Timestamp object
+   */
+  trackTiming: (
+    category: string,
+    variable: string,
+    timing: number,
+    label: string,
+    context: Array<SelfDescribingJson>,
+    tstamp: Timestamp
+  ) => void;
+
+  /**
+   * Track a consent withdrawn action
+   *
+   * @param {boolean} all - Indicates user withdraws all consent regardless of context documents.
+   * @param {string} [id] - Number associated with document.
+   * @param {string} [version] - Document version number.
+   * @param {string} [name] - Document name.
+   * @param {string} [description] - Document description.
+   * @param {array} [context] - Context relating to the event.
+   * @param {number|Timestamp} [tstamp] - Number or Timestamp object.
+   */
+  trackConsentWithdrawn: (
+    all: boolean,
+    id: string,
+    version: string,
+    name: string,
+    description: string,
+    context: Array<SelfDescribingJson>,
+    tstamp: Timestamp
+  ) => void;
+
+  /**
+   * Track a consent granted action
+   *
+   * @param {string} id - ID number associated with document.
+   * @param {string} version - Document version number.
+   * @param {string} [name] - Document name.
+   * @param {string} [description] - Document description.
+   * @param {string} [expiry] - Date-time when consent document(s) expire.
+   * @param {array} [context] - Context containing consent documents.
+   * @param {Timestamp|number} [tstamp] - number or Timestamp object.
+   */
+  trackConsentGranted: (
+    id: string,
+    version: string,
+    name: string,
+    description: string,
+    expiry: string,
+    context: Array<SelfDescribingJson>,
+    tstamp: Timestamp
+  ) => void;
+
+  /**
+   * Track a GA Enhanced Ecommerce Action with all stored
+   * Enhanced Ecommerce contexts
+   *
+   * @param string action
+   * @param array context Optional. Context relating to the event.
+   * @param tstamp Opinal number or Timestamp object
+   */
+  trackEnhancedEcommerceAction: (action: string, context: Array<SelfDescribingJson>, tstamp: Timestamp) => void;
+
+  /**
+   * Adds a GA Enhanced Ecommerce Action Context
+   *
+   * @param string id
+   * @param string affiliation
+   * @param number revenue
+   * @param number tax
+   * @param number shipping
+   * @param string coupon
+   * @param string list
+   * @param integer step
+   * @param string option
+   * @param string currency
+   */
+  addEnhancedEcommerceActionContext: (
+    id: string,
+    affiliation: string,
+    revenue: number,
+    tax: number,
+    shipping: number,
+    coupon: string,
+    list: string,
+    step: number,
+    option: string,
+    currency: string
+  ) => void;
+
+  /**
+   * Adds a GA Enhanced Ecommerce Impression Context
+   *
+   * @param string id
+   * @param string name
+   * @param string list
+   * @param string brand
+   * @param string category
+   * @param string variant
+   * @param integer position
+   * @param number price
+   * @param string currency
+   */
+  addEnhancedEcommerceImpressionContext: (
+    id: string,
+    name: string,
+    list: string,
+    brand: string,
+    category: string,
+    variant: string,
+    position: number,
+    price: number,
+    currency: string
+  ) => void;
+
+  /**
+   * Adds a GA Enhanced Ecommerce Product Context
+   *
+   * @param string id
+   * @param string name
+   * @param string list
+   * @param string brand
+   * @param string category
+   * @param string variant
+   * @param number price
+   * @param integer quantity
+   * @param string coupon
+   * @param integer position
+   * @param string currency
+   */
+  addEnhancedEcommerceProductContext: (
+    id: string,
+    name: string,
+    list: string,
+    brand: string,
+    category: string,
+    variant: string,
+    price: number,
+    quantity: number,
+    coupon: string,
+    position: number,
+    currency: string
+  ) => void;
+
+  /**
+   * Adds a GA Enhanced Ecommerce Promo Context
+   *
+   * @param string id
+   * @param string name
+   * @param string creative
+   * @param string position
+   * @param string currency
+   */
+  addEnhancedEcommercePromoContext: (
+    id: string,
+    name: string,
+    creative: string,
+    position: string,
+    currency: string
+  ) => void;
+
+  /**
+   * All provided contexts will be sent with every event
+   *
+   * @param contexts Array<ContextPrimitive | ConditionalContextProvider>
+   */
+  addGlobalContexts: (contexts: Array<ConditionalContextProvider | ContextPrimitive>) => void;
+
+  /**
+   * All provided contexts will no longer be sent with every event
+   *
+   * @param contexts Array<ContextPrimitive | ConditionalContextProvider>
+   */
+  removeGlobalContexts: (contexts: Array<ConditionalContextProvider | ContextPrimitive>) => void;
+
+  /**
+   * Clear all global contexts that are sent with events
+   */
+  clearGlobalContexts: () => void;
+
+  /**
+   * Stop regenerating `pageViewId` (available from `web_page` context)
+   */
+  preservePageViewId: () => void;
+
+  /**
+   * Disables anonymous tracking if active (ie. tracker initialized with `anonymousTracking`)
+   * For stateStorageStrategy override, uses supplied value first,
+   * falls back to one defined in initial config, otherwise uses cookieAndLocalStorage.
+   * @param {string} stateStorageStrategy - Override for state storage
+   */
+  disableAnonymousTracking: (stateStorageStrategy?: string) => void;
+
+  /**
+   * Enables anonymous tracking (ie. tracker initialized without `anonymousTracking`)
+   */
+  enableAnonymousTracking: (anonymousArgs?: AnonymousTrackingOptions) => void;
+
+  /**
+   * Clears all cookies and local storage containing user and session identifiers
+   */
+  clearUserData: () => void;
+};
 
 /**
  * Snowplow Tracker class
@@ -96,7 +830,13 @@ import { trackerCore } from '@snowplow/tracker-core';
  * 24. connectionTimeout, 5000
  * 26. anonymousTracking, false // bool | { withSessionTracking: bool, withServerAnonymisation: bool }
  */
-export function Tracker(functionName, namespace, version, mutSnowplowState, argmap) {
+export function Tracker(
+  functionName: string,
+  namespace: string,
+  version: string,
+  mutSnowplowState: SharedState,
+  argmap: any
+): TrackerApi {
   /************************************************************
    * Private members
    ************************************************************/
@@ -111,25 +851,25 @@ export function Tracker(functionName, namespace, version, mutSnowplowState, argm
     argmap.useStm = true;
   }
 
-  const getStateStorageStrategy = (config) =>
+  const getStateStorageStrategy = (config: { stateStorageStrategy: string }) =>
     config.hasOwnProperty('stateStorageStrategy') ? config.stateStorageStrategy : 'cookieAndLocalStorage';
 
-  const getAnonymousSessionTracking = (config) =>
+  const getAnonymousSessionTracking = (config: AnonymousTrackingOptions) =>
     config.hasOwnProperty('anonymousTracking') ? config.anonymousTracking.withSessionTracking === true : false;
 
-  const getAnonymousServerTracking = (config) =>
+  const getAnonymousServerTracking = (config: AnonymousTrackingOptions) =>
     config.hasOwnProperty('anonymousTracking') ? config.anonymousTracking.withServerAnonymisation === true : false;
 
-  const getAnonymousTracking = (config) => !!config.anonymousTracking;
+  const getAnonymousTracking = (config: AnonymousTrackingOptions) => !!config.anonymousTracking;
 
   const contextPlugins = (argmap.contextPlugins || []).concat(getWebPagePlugin());
 
   var // Tracker core
     core = trackerCore(
       true,
-      function (payload) {
-        addBrowserData(payload);
-        sendRequest(payload, configTrackerPause);
+      function (payloadBuilder) {
+        addBrowserData(payloadBuilder);
+        sendRequest(payloadBuilder, configTrackerPause);
       },
       contextPlugins
     ),
@@ -137,12 +877,12 @@ export function Tracker(functionName, namespace, version, mutSnowplowState, argm
     // or silence all errors from public methods
     debug = false,
     // API functions of the tracker
-    apiMethods = {},
+    apiMethods: Record<string, Function> = {},
     // Safe methods (i.e. ones that won't raise errors)
     // These values should be guarded publicMethods
-    safeMethods = {},
+    safeMethods: TrackerApi,
     // The client-facing methods returned from tracker IIFE
-    returnMethods = {},
+    returnMethods: TrackerApi,
     // Aliases
     documentAlias = document,
     windowAlias = window,
@@ -152,21 +892,21 @@ export function Tracker(functionName, namespace, version, mutSnowplowState, argm
     domainAlias = fixupDomain(locationArray[0]),
     locationHrefAlias = locationArray[1],
     configReferrerUrl = locationArray[2],
-    customReferrer,
+    customReferrer: string,
     // Platform defaults to web for this tracker
     configPlatform = argmap.hasOwnProperty('platform') ? argmap.platform : 'web',
     // Snowplow collector URL
-    configCollectorUrl,
+    configCollectorUrl: string,
     // Custom path for post requests (to get around adblockers)
     configPostPath = argmap.hasOwnProperty('postPath') ? argmap.postPath : '/com.snowplowanalytics.snowplow/tp2',
     // Site ID
     configTrackerSiteId = argmap.hasOwnProperty('appId') ? argmap.appId : '', // Updated for Snowplow
     // Document URL
-    configCustomUrl,
+    configCustomUrl: string,
     // Document title
     lastDocumentTitle = documentAlias.title,
     // Custom title
-    lastConfigTitle,
+    lastConfigTitle: string | undefined,
     // Maximum delay to wait for web bug image to be fetched (in milliseconds)
     configTrackerPause = argmap.hasOwnProperty('pageUnloadTimer') ? argmap.pageUnloadTimer : 500,
     // Controls whether activity tracking page ping event timers are reset on page view events
@@ -174,9 +914,9 @@ export function Tracker(functionName, namespace, version, mutSnowplowState, argm
       ? argmap.resetActivityTrackingOnPageView
       : true,
     // Disallow hash tags in URL. TODO: Should this be set to true by default?
-    configDiscardHashTag,
+    configDiscardHashTag: boolean,
     // Disallow brace in URL.
-    configDiscardBrace,
+    configDiscardBrace: boolean,
     // First-party cookie name prefix
     configCookieNamePrefix = argmap.hasOwnProperty('cookieName') ? argmap.cookieName : '_sp_',
     // First-party cookie domain
@@ -190,13 +930,13 @@ export function Tracker(functionName, namespace, version, mutSnowplowState, argm
     // First-party cookie secure attribute
     configCookieSecure = argmap.hasOwnProperty('cookieSecure') ? argmap.cookieSecure : true,
     // Do Not Track browser feature
-    dnt = navigatorAlias.doNotTrack || navigatorAlias.msDoNotTrack || windowAlias.doNotTrack,
+    dnt = navigatorAlias.doNotTrack || (navigatorAlias as any).msDoNotTrack || windowAlias.doNotTrack,
     // Do Not Track
     configDoNotTrack = argmap.hasOwnProperty('respectDoNotTrack')
       ? argmap.respectDoNotTrack && (dnt === 'yes' || dnt === '1')
       : false,
     // Opt out of cookie tracking
-    configOptOutCookie,
+    configOptOutCookie: string,
     // Life of the visitor cookie (in seconds)
     configVisitorCookieTimeout = argmap.hasOwnProperty('cookieLifetime') ? argmap.cookieLifetime : 63072000, // 2 years
     // Life of the session cookie (in seconds)
@@ -219,31 +959,31 @@ export function Tracker(functionName, namespace, version, mutSnowplowState, argm
     // Unique ID for the tracker instance used to mark links which are being tracked
     trackerId = functionName + '_' + namespace,
     // Last activity timestamp
-    lastActivityTime,
+    lastActivityTime: number,
     // The last time an event was fired on the page - used to invalidate session if cookies are disabled
     lastEventTime = new Date().getTime(),
     // How are we scrolling?
-    minXOffset,
-    maxXOffset,
-    minYOffset,
-    maxYOffset,
+    minXOffset: number,
+    maxXOffset: number,
+    minYOffset: number,
+    maxYOffset: number,
     // Hash function
     hash = sha1,
     // Domain hash value
-    domainHash,
+    domainHash: string,
     // Domain unique user ID
-    domainUserId,
+    domainUserId: string,
     // ID for the current session
-    memorizedSessionId,
+    memorizedSessionId: string,
     // Index for the current session - kept in memory in case cookies are disabled
     memorizedVisitCount = 1,
     // Business-defined unique user ID
-    businessUserId,
+    businessUserId: string | null,
     // Ecommerce transaction data
     // Will be committed, sent and emptied by a call to trackTrans.
     ecommerceTransaction = ecommerceTransactionTemplate(),
     // Manager for local storage queue
-    outQueue = new OutQueueManager(
+    outQueue = OutQueueManager(
       functionName,
       namespace,
       mutSnowplowState,
@@ -258,13 +998,13 @@ export function Tracker(functionName, namespace, version, mutSnowplowState, argm
       configAnonymousServerTracking
     ),
     // Enhanced Ecommerce Contexts to be added on every `trackEnhancedEcommerceAction` call
-    enhancedEcommerceContexts = [],
+    enhancedEcommerceContexts: Array<SelfDescribingJson> = [],
     // Whether pageViewId should be regenerated after each trackPageView. Affect web_page context
     preservePageViewId = false,
     // Whether first trackPageView was fired and pageViewId should not be changed anymore until reload
     pageViewSent = false,
     // Activity tracking config for callback and pacge ping variants
-    activityTrackingConfig = {
+    activityTrackingConfig: ActivityTrackingConfig = {
       enabled: false,
       installed: false, // Guard against installing the activity tracker more than once per Tracker instance
       configurations: {},
@@ -313,10 +1053,11 @@ export function Tracker(functionName, namespace, version, mutSnowplowState, argm
    *
    * @param event e The event targeting the link
    */
-  function linkDecorationHandler() {
+  function linkDecorationHandler(evt: Event) {
     var tstamp = new Date().getTime();
-    if (this.href) {
-      this.href = decorateQuerystring(this.href, '_sp', domainUserId + '.' + tstamp);
+    let elt = evt.target as HTMLAnchorElement | HTMLAreaElement | null;
+    if (elt?.href) {
+      elt.href = decorateQuerystring(elt.href, '_sp', domainUserId + '.' + tstamp);
     }
   }
 
@@ -327,15 +1068,15 @@ export function Tracker(functionName, namespace, version, mutSnowplowState, argm
    *
    * @param crossDomainLinker Function used to determine which links to decorate
    */
-  function decorateLinks(crossDomainLinker) {
+  function decorateLinks(crossDomainLinker: (elt: HTMLAnchorElement | HTMLAreaElement) => boolean) {
     for (var i = 0; i < documentAlias.links.length; i++) {
       var elt = documentAlias.links[i];
-      if (!elt.spDecorationEnabled && crossDomainLinker(elt)) {
+      if (!(elt as any).spDecorationEnabled && crossDomainLinker(elt)) {
         addEventListener(elt, 'click', linkDecorationHandler, true);
         addEventListener(elt, 'mousedown', linkDecorationHandler, true);
 
         // Don't add event listeners more than once
-        elt.spDecorationEnabled = true;
+        (elt as any).spDecorationEnabled = true;
       }
     }
   }
@@ -344,9 +1085,33 @@ export function Tracker(functionName, namespace, version, mutSnowplowState, argm
    * Initializes an empty ecommerce
    * transaction and line items
    */
-  function ecommerceTransactionTemplate() {
+  function ecommerceTransactionTemplate(): {
+    transaction?: {
+      orderId: string;
+      affiliation: string;
+      total: string;
+      tax?: string;
+      shipping?: string;
+      city?: string;
+      state?: string;
+      country?: string;
+      currency?: string;
+      context?: Array<SelfDescribingJson>;
+      tstamp?: Timestamp;
+    };
+    items: Array<{
+      orderId: string;
+      sku: string;
+      name: string;
+      category: string;
+      price: string;
+      quantity: string;
+      currency: string;
+      context: Array<SelfDescribingJson>;
+      tstamp: Timestamp;
+    }>;
+  } {
     return {
-      transaction: {},
       items: [],
     };
   }
@@ -357,7 +1122,7 @@ export function Tracker(functionName, namespace, version, mutSnowplowState, argm
    * URLs are purified before being recorded in the cookie,
    * or before being sent as GET parameters
    */
-  function purify(url) {
+  function purify(url: string) {
     var targetPattern;
 
     if (configDiscardHashTag) {
@@ -375,7 +1140,7 @@ export function Tracker(functionName, namespace, version, mutSnowplowState, argm
   /*
    * Extract scheme/protocol from URL
    */
-  function getProtocolScheme(url) {
+  function getProtocolScheme(url: string) {
     var e = new RegExp('^([a-z]+):'),
       matches = e.exec(url);
 
@@ -387,7 +1152,7 @@ export function Tracker(functionName, namespace, version, mutSnowplowState, argm
    *
    * Note: not as described in rfc3986 section 5.2
    */
-  function resolveRelativeReference(baseUrl, url) {
+  function resolveRelativeReference(baseUrl: string, url: string) {
     var protocol = getProtocolScheme(url),
       i;
 
@@ -413,7 +1178,7 @@ export function Tracker(functionName, namespace, version, mutSnowplowState, argm
   /*
    * Send request
    */
-  function sendRequest(request, delay) {
+  function sendRequest(request: PayloadBuilder, delay: number) {
     var now = new Date();
 
     // Set to true if Opt-out cookie is defined
@@ -433,20 +1198,21 @@ export function Tracker(functionName, namespace, version, mutSnowplowState, argm
   /*
    * Get cookie name with prefix and domain hash
    */
-  function getSnowplowCookieName(baseName) {
+  function getSnowplowCookieName(baseName: string) {
     return configCookieNamePrefix + baseName + '.' + domainHash;
   }
 
   /*
    * Cookie getter.
    */
-  function getSnowplowCookieValue(cookieName) {
+  function getSnowplowCookieValue(cookieName: string) {
     var fullName = getSnowplowCookieName(cookieName);
     if (configStateStorageStrategy == 'localStorage') {
       return attemptGetLocalStorage(fullName);
     } else if (configStateStorageStrategy == 'cookie' || configStateStorageStrategy == 'cookieAndLocalStorage') {
       return cookie(fullName);
     }
+    return undefined;
   }
 
   /*
@@ -525,13 +1291,9 @@ export function Tracker(functionName, namespace, version, mutSnowplowState, argm
   /*
    * Prevents offsets from being decimal or NaN
    * See https://github.com/snowplow/snowplow-javascript-tracker/issues/324
-   * TODO: the NaN check should be moved into the core
    */
-  function cleanOffset(offset) {
-    var rounded = Math.round(offset);
-    if (!isNaN(rounded)) {
-      return rounded;
-    }
+  function cleanOffset(offset: number) {
+    return Math.round(offset);
   }
 
   /*
@@ -547,7 +1309,14 @@ export function Tracker(functionName, namespace, version, mutSnowplowState, argm
    * Sets the Visitor ID cookie: either the first time loadDomainUserIdCookie is called
    * or when there is a new visit or a new page view
    */
-  function setDomainUserIdCookie(_domainUserId, createTs, visitCount, nowTs, lastVisitTs, sessionId) {
+  function setDomainUserIdCookie(
+    _domainUserId: string,
+    createTs: number,
+    visitCount: number,
+    nowTs: number,
+    lastVisitTs: number,
+    sessionId: string
+  ) {
     var cookieName = getSnowplowCookieName('id');
     var cookieValue =
       _domainUserId + '.' + createTs + '.' + visitCount + '.' + nowTs + '.' + lastVisitTs + '.' + sessionId;
@@ -561,7 +1330,7 @@ export function Tracker(functionName, namespace, version, mutSnowplowState, argm
    * - if 'cookie' or 'cookieAndLocalStorage': writes to cookies
    * - otherwise: no-op
    */
-  function setCookie(name, value, timeout) {
+  function setCookie(name: string, value: string, timeout: number) {
     if (configAnonymousTracking && !configAnonymousSessionTracking) {
       return;
     }
@@ -605,7 +1374,7 @@ export function Tracker(functionName, namespace, version, mutSnowplowState, argm
     var idCookieComponents = loadDomainUserIdCookie();
 
     if (idCookieComponents[1]) {
-      domainUserId = idCookieComponents[1];
+      domainUserId = idCookieComponents[1] as string;
     } else if (!configAnonymousTracking) {
       domainUserId = createNewDomainUserId();
       idCookieComponents[1] = domainUserId;
@@ -614,11 +1383,11 @@ export function Tracker(functionName, namespace, version, mutSnowplowState, argm
       idCookieComponents[1] = domainUserId;
     }
 
-    memorizedSessionId = idCookieComponents[6];
+    memorizedSessionId = idCookieComponents[6] as string;
 
     if (!sesCookieSet) {
       // Increment the session ID
-      idCookieComponents[3]++;
+      (idCookieComponents[3] as number)++;
       // Create a new sessionId
       memorizedSessionId = uuid();
       idCookieComponents[6] = memorizedSessionId;
@@ -631,7 +1400,7 @@ export function Tracker(functionName, namespace, version, mutSnowplowState, argm
       // Update currentVisitTs
       idCookieComponents[4] = Math.round(new Date().getTime() / 1000);
       idCookieComponents.shift();
-      setDomainUserIdCookie.apply(null, idCookieComponents);
+      setDomainUserIdCookie.apply(null, idCookieComponents as any); // TODO: Remove any
     }
   }
 
@@ -681,20 +1450,21 @@ export function Tracker(functionName, namespace, version, mutSnowplowState, argm
    * (resolution, url, referrer, etc.)
    * Also sets the required cookies.
    */
-  function addBrowserData(sb) {
-    const anonymizeOr = (value) => (configAnonymousTracking ? null : value);
-    const anonymizeSessionOr = (value) => (configAnonymousSessionTracking ? value : anonymizeOr(value));
+  function addBrowserData(payloadBuilder: PayloadBuilder) {
+    const anonymizeOr = (value: string | number | null) => (configAnonymousTracking ? null : value);
+    const anonymizeSessionOr = (value: string | number) =>
+      configAnonymousSessionTracking ? value : anonymizeOr(value);
 
     var nowTs = Math.round(new Date().getTime() / 1000),
       ses = getSnowplowCookieValue('ses'),
       id = loadDomainUserIdCookie(),
       cookiesDisabled = id[0],
-      _domainUserId = id[1], // We could use the global (domainUserId) but this is better etiquette
-      createTs = id[2],
-      visitCount = id[3],
-      currentVisitTs = id[4],
-      lastVisitTs = id[5],
-      sessionIdFromCookie = id[6];
+      _domainUserId = id[1] as string, // We could use the global (domainUserId) but this is better etiquette
+      createTs = id[2] as number,
+      visitCount = id[3] as number,
+      currentVisitTs = id[4] as number,
+      lastVisitTs = id[5] as number,
+      sessionIdFromCookie = id[6] as string;
 
     var toOptoutByCookie;
     if (configOptOutCookie) {
@@ -710,37 +1480,37 @@ export function Tracker(functionName, namespace, version, mutSnowplowState, argm
 
     // If cookies are enabled, base visit count and session ID on the cookies
     if (cookiesDisabled === '0') {
-      memorizedSessionId = sessionIdFromCookie;
+      memorizedSessionId = sessionIdFromCookie as string;
 
       // New session?
       if (!ses && configStateStorageStrategy != 'none') {
         // New session (aka new visit)
-        visitCount++;
+        (visitCount as number)++;
         // Update the last visit timestamp
         lastVisitTs = currentVisitTs;
         // Regenerate the session ID
         memorizedSessionId = uuid();
       }
 
-      memorizedVisitCount = visitCount;
+      memorizedVisitCount = visitCount as number;
     } else if (new Date().getTime() - lastEventTime > configSessionCookieTimeout * 1000) {
       memorizedSessionId = uuid();
       memorizedVisitCount++;
     }
 
     // Build out the rest of the request
-    if (detectors.window) detectors.window(sb);
-    sb.add('vid', anonymizeSessionOr(memorizedVisitCount));
-    sb.add('sid', anonymizeSessionOr(memorizedSessionId));
-    sb.add('duid', anonymizeOr(_domainUserId)); // Set to our local variable
-    sb.add('uid', anonymizeOr(businessUserId));
+    if (detectors.window) detectors.window(payloadBuilder);
+    payloadBuilder.add('vid', anonymizeSessionOr(memorizedVisitCount));
+    payloadBuilder.add('sid', anonymizeSessionOr(memorizedSessionId));
+    payloadBuilder.add('duid', anonymizeOr(_domainUserId)); // Set to our local variable
+    payloadBuilder.add('uid', anonymizeOr(businessUserId));
 
     refreshUrl();
 
-    sb.add('refr', purify(customReferrer || configReferrerUrl));
+    payloadBuilder.add('refr', purify(customReferrer || configReferrerUrl));
 
     // Add the page URL last as it may take us over the IE limit (and we don't always need it)
-    sb.add('url', purify(configCustomUrl || locationHrefAlias));
+    payloadBuilder.add('url', purify(configCustomUrl || locationHrefAlias));
 
     // Update cookies
     if (configStateStorageStrategy != 'none') {
@@ -758,7 +1528,7 @@ export function Tracker(functionName, namespace, version, mutSnowplowState, argm
    *
    * @return string collectorUrl The tracker URL with protocol
    */
-  function asCollectorUrl(rawUrl) {
+  function asCollectorUrl(rawUrl: string) {
     if (forceSecureTracker) {
       return 'https' + '://' + rawUrl;
     }
@@ -817,12 +1587,12 @@ export function Tracker(functionName, namespace, version, mutSnowplowState, argm
     var nowTs = Math.round(new Date().getTime() / 1000),
       id = loadDomainUserIdCookie(),
       cookiesDisabled = id[0],
-      _domainUserId = id[1], // We could use the global (domainUserId) but this is better etiquette
-      createTs = id[2],
-      visitCount = id[3],
-      currentVisitTs = id[4],
-      lastVisitTs = id[5],
-      sessionIdFromCookie = id[6];
+      _domainUserId = id[1] as string, // We could use the global (domainUserId) but this is better etiquette
+      createTs = id[2] as number,
+      visitCount = id[3] as number,
+      currentVisitTs = id[4] as number,
+      lastVisitTs = id[5] as number,
+      sessionIdFromCookie = id[6] as string;
 
     // When cookies are enabled
     if (cookiesDisabled === '0') {
@@ -862,7 +1632,10 @@ export function Tracker(functionName, namespace, version, mutSnowplowState, argm
    * @param staticContexts Array of custom contexts
    * @param contextCallback Function returning an array of contexts
    */
-  function finalizeContexts(staticContexts, contextCallback) {
+  function finalizeContexts(
+    staticContexts?: Array<SelfDescribingJson>,
+    contextCallback?: () => Array<SelfDescribingJson>
+  ) {
     return (staticContexts || []).concat(contextCallback ? contextCallback() : []);
   }
 
@@ -875,7 +1648,13 @@ export function Tracker(functionName, namespace, version, mutSnowplowState, argm
    * @param tstamp number
    * @param function afterTrack (optional) A callback function triggered after event is tracked
    */
-  function logPageView(customTitle, context, contextCallback, tstamp, afterTrack) {
+  function logPageView(
+    customTitle?: string,
+    context?: Array<SelfDescribingJson>,
+    contextCallback?: () => Array<SelfDescribingJson>,
+    tstamp?: Timestamp,
+    afterTrack?: ((Payload: Payload) => void) | undefined
+  ) {
     refreshUrl();
     if (pageViewSent) {
       // Do not reset pageViewId if previous events were not page_view
@@ -909,7 +1688,7 @@ export function Tracker(functionName, namespace, version, mutSnowplowState, argm
       installingActivityTracking = true;
 
       // Add mousewheel event handler, detect passive event listeners for performance
-      var detectPassiveEvents = {
+      var detectPassiveEvents: { update: () => void; hasSupport?: boolean } = {
         update: function update() {
           if (typeof window !== 'undefined' && typeof window.addEventListener === 'function') {
             var passive = false;
@@ -935,7 +1714,7 @@ export function Tracker(functionName, namespace, version, mutSnowplowState, argm
       var wheelEvent =
         'onwheel' in document.createElement('div')
           ? 'wheel' // Modern browsers support "wheel"
-          : document.onmousewheel !== undefined
+          : (document as any).onmousewheel !== undefined
           ? 'mousewheel' // Webkit and IE support at least "mousewheel"
           : 'DOMMouseScroll'; // let's assume that remaining browsers are older Firefox
 
@@ -952,7 +1731,8 @@ export function Tracker(functionName, namespace, version, mutSnowplowState, argm
       // @see http://quirksmode.org/dom/events
       const documentHandlers = ['click', 'mouseup', 'mousedown', 'mousemove', 'keypress', 'keydown', 'keyup'];
       const windowHandlers = ['resize', 'focus', 'blur'];
-      const listener = (alias, handler = activityHandler) => (ev) => addEventListener(documentAlias, ev, handler);
+      const listener = (_: Document | Window, handler = activityHandler) => (ev: string) =>
+        addEventListener(documentAlias, ev, handler);
 
       forEach(documentHandlers, listener(documentAlias));
       forEach(windowHandlers, listener(windowAlias));
@@ -963,12 +1743,12 @@ export function Tracker(functionName, namespace, version, mutSnowplowState, argm
       // Periodic check for activity.
       lastActivityTime = now.getTime();
 
-      for (var key in activityTrackingConfig.configurations) {
-        if (activityTrackingConfig.configurations.hasOwnProperty(key)) {
-          const config = activityTrackingConfig.configurations[key];
-
+      let key: keyof ActivityConfigurations;
+      for (key in activityTrackingConfig.configurations) {
+        const config = activityTrackingConfig.configurations[key];
+        if (config) {
           //Clear page ping heartbeat on new page view
-          clearInterval(config.activityInterval);
+          window.clearInterval(config.activityInterval);
 
           activityInterval(config, finalizeContexts(context, contextCallback));
         }
@@ -976,8 +1756,8 @@ export function Tracker(functionName, namespace, version, mutSnowplowState, argm
     }
   }
 
-  function activityInterval(config, context) {
-    const executePagePing = (cb, c) => {
+  function activityInterval(config: ActivityConfig, context: Array<SelfDescribingJson>) {
+    const executePagePing = (cb: AcitivtyCallback, c: Array<SelfDescribingJson>) => {
       refreshUrl();
       cb({ context: c, pageViewId: getPageViewId(), minXOffset, minYOffset, maxXOffset, maxYOffset });
       resetMaxScrolls();
@@ -992,7 +1772,7 @@ export function Tracker(functionName, namespace, version, mutSnowplowState, argm
         executePagePing(config.callback, context);
       }
 
-      config.activityInterval = setInterval(heartbeat, config.configHeartBeatTimer);
+      config.activityInterval = windowAlias.setInterval(heartbeat, config.configHeartBeatTimer);
     };
 
     const heartbeat = () => {
@@ -1006,9 +1786,9 @@ export function Tracker(functionName, namespace, version, mutSnowplowState, argm
     };
 
     if (config.configMinimumVisitLength != 0) {
-      config.activityInterval = setTimeout(timeout, config.configMinimumVisitLength);
+      config.activityInterval = windowAlias.setTimeout(timeout, config.configMinimumVisitLength);
     } else {
-      config.activityInterval = setInterval(heartbeat, config.configHeartBeatTimer);
+      config.activityInterval = windowAlias.setInterval(heartbeat, config.configHeartBeatTimer);
     }
   }
 
@@ -1020,18 +1800,21 @@ export function Tracker(functionName, namespace, version, mutSnowplowState, argm
    * @param {int} [heartBeatDelay] The length between checks to see if we should send a page ping
    * @param {function} [callback] A callback function to execute
    */
-  function configureActivityTracking(minimumVisitLength, heartBeatDelay, callback) {
+  function configureActivityTracking(
+    minimumVisitLength: number,
+    heartBeatDelay: number,
+    callback: AcitivtyCallback
+  ): ActivityConfig | undefined {
     if (isInteger(minimumVisitLength) && isInteger(heartBeatDelay)) {
       return {
         configMinimumVisitLength: minimumVisitLength * 1000,
         configHeartBeatTimer: heartBeatDelay * 1000,
-        activityInterval: null,
         callback,
       };
     }
 
     warn('Activity tracking not enabled, please provide integer values for minimumVisitLength and heartBeatDelay.');
-    return {};
+    return undefined;
   }
 
   /**
@@ -1042,11 +1825,11 @@ export function Tracker(functionName, namespace, version, mutSnowplowState, argm
    *
    * @param context object Custom context relating to the event
    */
-  function logPagePing({ context, minXOffset, minYOffset, maxXOffset, maxYOffset }) {
+  function logPagePing({ context, minXOffset, minYOffset, maxXOffset, maxYOffset }: ActivityCallbackData) {
     var newDocumentTitle = documentAlias.title;
     if (newDocumentTitle !== lastDocumentTitle) {
       lastDocumentTitle = newDocumentTitle;
-      lastConfigTitle = null;
+      lastConfigTitle = undefined;
     }
     core.trackPagePing(
       purify(configCustomUrl || locationHrefAlias),
@@ -1075,7 +1858,19 @@ export function Tracker(functionName, namespace, version, mutSnowplowState, argm
    * @param object context Custom context relating to the event
    * @param tstamp number or Timestamp object
    */
-  function logTransaction(orderId, affiliation, total, tax, shipping, city, state, country, currency, context, tstamp) {
+  function logTransaction(
+    orderId: string,
+    affiliation: string,
+    total: string,
+    tax?: string,
+    shipping?: string,
+    city?: string,
+    state?: string,
+    country?: string,
+    currency?: string,
+    context?: Array<SelfDescribingJson>,
+    tstamp?: Timestamp
+  ) {
     core.trackEcommerceTransaction(
       orderId,
       affiliation,
@@ -1103,19 +1898,18 @@ export function Tracker(functionName, namespace, version, mutSnowplowState, argm
    * @param string currency The currency the price is expressed in
    * @param object context Custom context relating to the event
    */
-  function logTransactionItem(orderId, sku, name, category, price, quantity, currency, context, tstamp) {
+  function logTransactionItem(
+    orderId: string,
+    sku: string,
+    name: string,
+    category: string,
+    price: string,
+    quantity: string,
+    currency: string,
+    context: Array<SelfDescribingJson>,
+    tstamp: Timestamp
+  ) {
     core.trackEcommerceTransactionItem(orderId, sku, name, category, price, quantity, currency, context, tstamp);
-  }
-
-  /**
-   * Update the returned methods (public facing methods)
-   */
-  function updateReturnMethods() {
-    if (debug) {
-      returnMethods = apiMethods;
-    } else {
-      returnMethods = safeMethods;
-    }
   }
 
   /************************************************************
@@ -1165,7 +1959,7 @@ export function Tracker(functionName, namespace, version, mutSnowplowState, argm
    *
    * @return string Cookie name
    */
-  apiMethods.getCookieName = function (basename) {
+  apiMethods.getCookieName = function (basename: string) {
     return getSnowplowCookieName(basename);
   };
 
@@ -1202,7 +1996,7 @@ export function Tracker(functionName, namespace, version, mutSnowplowState, argm
    *
    * @param string url
    */
-  apiMethods.setReferrerUrl = function (url) {
+  apiMethods.setReferrerUrl = function (url: string) {
     customReferrer = url;
   };
 
@@ -1211,7 +2005,7 @@ export function Tracker(functionName, namespace, version, mutSnowplowState, argm
    *
    * @param string url
    */
-  apiMethods.setCustomUrl = function (url) {
+  apiMethods.setCustomUrl = function (url: string) {
     refreshUrl();
     configCustomUrl = resolveRelativeReference(locationHrefAlias, url);
   };
@@ -1221,7 +2015,7 @@ export function Tracker(functionName, namespace, version, mutSnowplowState, argm
    *
    * @param string title
    */
-  apiMethods.setDocumentTitle = function (title) {
+  apiMethods.setDocumentTitle = function (title: string) {
     // So we know what document.title was at the time of trackPageView
     lastDocumentTitle = documentAlias.title;
     lastConfigTitle = title;
@@ -1232,7 +2026,7 @@ export function Tracker(functionName, namespace, version, mutSnowplowState, argm
    *
    * @param bool enableFilter
    */
-  apiMethods.discardHashTag = function (enableFilter) {
+  apiMethods.discardHashTag = function (enableFilter: boolean) {
     configDiscardHashTag = enableFilter;
   };
 
@@ -1241,7 +2035,7 @@ export function Tracker(functionName, namespace, version, mutSnowplowState, argm
    *
    * @param bool enableFilter
    */
-  apiMethods.discardBrace = function (enableFilter) {
+  apiMethods.discardBrace = function (enableFilter: boolean) {
     configDiscardBrace = enableFilter;
   };
 
@@ -1250,7 +2044,7 @@ export function Tracker(functionName, namespace, version, mutSnowplowState, argm
    *
    * @param string domain
    */
-  apiMethods.setCookiePath = function (path) {
+  apiMethods.setCookiePath = function (path: string) {
     configCookiePath = path;
     updateDomainHash();
   };
@@ -1260,7 +2054,7 @@ export function Tracker(functionName, namespace, version, mutSnowplowState, argm
    *
    * @param int timeout
    */
-  apiMethods.setVisitorCookieTimeout = function (timeout) {
+  apiMethods.setVisitorCookieTimeout = function (timeout: number) {
     configVisitorCookieTimeout = timeout;
   };
 
@@ -1269,7 +2063,9 @@ export function Tracker(functionName, namespace, version, mutSnowplowState, argm
    *
    * @param function crossDomainLinker Function used to determine which links to decorate
    */
-  apiMethods.crossDomainLinker = function (crossDomainLinkerCriterion) {
+  apiMethods.crossDomainLinker = function (
+    crossDomainLinkerCriterion: (elt: HTMLAnchorElement | HTMLAreaElement) => boolean
+  ) {
     decorateLinks(crossDomainLinkerCriterion);
   };
 
@@ -1280,7 +2076,7 @@ export function Tracker(functionName, namespace, version, mutSnowplowState, argm
    * @param int minimumVisitLength Seconds to wait before sending first page ping
    * @param int heartBeatDelay Seconds to wait between pings
    */
-  apiMethods.enableActivityTracking = function (minimumVisitLength, heartBeatDelay) {
+  apiMethods.enableActivityTracking = function (minimumVisitLength: number, heartBeatDelay: number) {
     activityTrackingConfig.enabled = true;
     activityTrackingConfig.configurations.pagePing = configureActivityTracking(
       minimumVisitLength,
@@ -1296,7 +2092,11 @@ export function Tracker(functionName, namespace, version, mutSnowplowState, argm
    * @param int heartBeatDelay Seconds to wait between pings
    * @param function callback function called with ping data
    */
-  apiMethods.enableActivityTrackingCallback = function (minimumVisitLength, heartBeatDelay, callback) {
+  apiMethods.enableActivityTrackingCallback = function (
+    minimumVisitLength: number,
+    heartBeatDelay: number,
+    callback: AcitivtyCallback
+  ) {
     activityTrackingConfig.enabled = true;
     activityTrackingConfig.configurations.callback = configureActivityTracking(
       minimumVisitLength,
@@ -1318,7 +2118,7 @@ export function Tracker(functionName, namespace, version, mutSnowplowState, argm
    *
    * @param string name of the opt out cookie
    */
-  apiMethods.setOptOutCookie = function (name) {
+  apiMethods.setOptOutCookie = function (name: string) {
     configOptOutCookie = name;
   };
 
@@ -1327,7 +2127,7 @@ export function Tracker(functionName, namespace, version, mutSnowplowState, argm
    *
    * @param string userId The business-defined user ID
    */
-  apiMethods.setUserId = function (userId) {
+  apiMethods.setUserId = function (userId: string) {
     businessUserId = userId;
   };
 
@@ -1336,7 +2136,7 @@ export function Tracker(functionName, namespace, version, mutSnowplowState, argm
    *
    * @param string userId The business-defined user ID
    */
-  apiMethods.identifyUser = function (userId) {
+  apiMethods.identifyUser = function (userId: string) {
     apiMethods.setUserId(userId);
   };
 
@@ -1345,7 +2145,7 @@ export function Tracker(functionName, namespace, version, mutSnowplowState, argm
    *
    * @param string queryName Name of a querystring name-value pair
    */
-  apiMethods.setUserIdFromLocation = function (querystringField) {
+  apiMethods.setUserIdFromLocation = function (querystringField: string) {
     refreshUrl();
     businessUserId = fromQuerystring(querystringField, locationHrefAlias);
   };
@@ -1355,7 +2155,7 @@ export function Tracker(functionName, namespace, version, mutSnowplowState, argm
    *
    * @param string queryName Name of a querystring name-value pair
    */
-  apiMethods.setUserIdFromReferrer = function (querystringField) {
+  apiMethods.setUserIdFromReferrer = function (querystringField: string) {
     refreshUrl();
     businessUserId = fromQuerystring(querystringField, configReferrerUrl);
   };
@@ -1365,7 +2165,7 @@ export function Tracker(functionName, namespace, version, mutSnowplowState, argm
    *
    * @param string cookieName Name of the cookie whose value will be assigned to businessUserId
    */
-  apiMethods.setUserIdFromCookie = function (cookieName) {
+  apiMethods.setUserIdFromCookie = function (cookieName: string) {
     businessUserId = cookie(cookieName);
   };
 
@@ -1376,7 +2176,7 @@ export function Tracker(functionName, namespace, version, mutSnowplowState, argm
    *
    * @param string rawUrl The collector URL minus protocol and /i
    */
-  apiMethods.setCollectorUrl = function (rawUrl) {
+  apiMethods.setCollectorUrl = function (rawUrl: string) {
     configCollectorUrl = asCollectorUrl(rawUrl);
   };
 
@@ -1397,7 +2197,13 @@ export function Tracker(functionName, namespace, version, mutSnowplowState, argm
    * @param tstamp number or Timestamp object
    * @param function afterTrack (optional) A callback function triggered after event is tracked
    */
-  apiMethods.trackPageView = function (customTitle, context, contextCallback, tstamp, afterTrack) {
+  apiMethods.trackPageView = function (
+    customTitle: string,
+    context: Array<SelfDescribingJson>,
+    contextCallback: () => Array<SelfDescribingJson>,
+    tstamp: Timestamp,
+    afterTrack: (payload: Payload) => void
+  ) {
     logPageView(customTitle, context, contextCallback, tstamp, afterTrack);
   };
 
@@ -1416,7 +2222,16 @@ export function Tracker(functionName, namespace, version, mutSnowplowState, argm
    * @param number|Timestamp tstamp (optional) TrackerTimestamp of the event
    * @param function afterTrack (optional) A callback function triggered after event is tracked
    */
-  apiMethods.trackStructEvent = function (category, action, label, property, value, context, tstamp, afterTrack) {
+  apiMethods.trackStructEvent = function (
+    category: string,
+    action: string,
+    label: string,
+    property: string,
+    value: number | undefined,
+    context: Array<SelfDescribingJson>,
+    tstamp: Timestamp,
+    afterTrack: (payload: Payload) => void
+  ) {
     core.trackStructEvent(category, action, label, property, value, context, tstamp, afterTrack);
   };
 
@@ -1428,7 +2243,12 @@ export function Tracker(functionName, namespace, version, mutSnowplowState, argm
    * @param tstamp number or Timestamp object
    * @param function afterTrack (optional) A callback function triggered after event is tracked
    */
-  apiMethods.trackSelfDescribingEvent = function (eventJson, context, tstamp, afterTrack) {
+  apiMethods.trackSelfDescribingEvent = function (
+    eventJson: Record<string, unknown>,
+    context: Array<SelfDescribingJson>,
+    tstamp: Timestamp,
+    afterTrack: (payload: Payload) => void
+  ) {
     core.trackSelfDescribingEvent(eventJson, context, tstamp, afterTrack);
   };
 
@@ -1448,17 +2268,17 @@ export function Tracker(functionName, namespace, version, mutSnowplowState, argm
    * @param tstamp number or Timestamp object
    */
   apiMethods.addTrans = function (
-    orderId,
-    affiliation,
-    total,
-    tax,
-    shipping,
-    city,
-    state,
-    country,
-    currency,
-    context,
-    tstamp
+    orderId: string,
+    affiliation: string,
+    total: string,
+    tax?: string,
+    shipping?: string,
+    city?: string,
+    state?: string,
+    country?: string,
+    currency?: string,
+    context?: Array<SelfDescribingJson>,
+    tstamp?: Timestamp
   ) {
     ecommerceTransaction.transaction = {
       orderId: orderId,
@@ -1488,7 +2308,17 @@ export function Tracker(functionName, namespace, version, mutSnowplowState, argm
    * @param object context Optional. Context relating to the event.
    * @param tstamp number or Timestamp object
    */
-  apiMethods.addItem = function (orderId, sku, name, category, price, quantity, currency, context, tstamp) {
+  apiMethods.addItem = function (
+    orderId: string,
+    sku: string,
+    name: string,
+    category: string,
+    price: string,
+    quantity: string,
+    currency: string,
+    context: Array<SelfDescribingJson>,
+    tstamp: Timestamp
+  ) {
     ecommerceTransaction.items.push({
       orderId: orderId,
       sku: sku,
@@ -1509,19 +2339,21 @@ export function Tracker(functionName, namespace, version, mutSnowplowState, argm
    * addItem methods to the tracking server.
    */
   apiMethods.trackTrans = function () {
-    logTransaction(
-      ecommerceTransaction.transaction.orderId,
-      ecommerceTransaction.transaction.affiliation,
-      ecommerceTransaction.transaction.total,
-      ecommerceTransaction.transaction.tax,
-      ecommerceTransaction.transaction.shipping,
-      ecommerceTransaction.transaction.city,
-      ecommerceTransaction.transaction.state,
-      ecommerceTransaction.transaction.country,
-      ecommerceTransaction.transaction.currency,
-      ecommerceTransaction.transaction.context,
-      ecommerceTransaction.transaction.tstamp
-    );
+    if (ecommerceTransaction.transaction) {
+      logTransaction(
+        ecommerceTransaction.transaction.orderId,
+        ecommerceTransaction.transaction.affiliation,
+        ecommerceTransaction.transaction.total,
+        ecommerceTransaction.transaction.tax,
+        ecommerceTransaction.transaction.shipping,
+        ecommerceTransaction.transaction.city,
+        ecommerceTransaction.transaction.state,
+        ecommerceTransaction.transaction.country,
+        ecommerceTransaction.transaction.currency,
+        ecommerceTransaction.transaction.context,
+        ecommerceTransaction.transaction.tstamp
+      );
+    }
     for (var i = 0; i < ecommerceTransaction.items.length; i++) {
       var item = ecommerceTransaction.items[i];
       logTransactionItem(
@@ -1554,16 +2386,16 @@ export function Tracker(functionName, namespace, version, mutSnowplowState, argm
    * @param tstamp number or Timestamp object
    */
   apiMethods.trackAdImpression = function (
-    impressionId,
-    costModel,
-    cost,
-    targetUrl,
-    bannerId,
-    zoneId,
-    advertiserId,
-    campaignId,
-    context,
-    tstamp
+    impressionId: string,
+    costModel: string,
+    cost: number,
+    targetUrl: string,
+    bannerId: string,
+    zoneId: string,
+    advertiserId: string,
+    campaignId: string,
+    context: Array<SelfDescribingJson>,
+    tstamp: Timestamp
   ) {
     core.trackAdImpression(
       impressionId,
@@ -1595,17 +2427,17 @@ export function Tracker(functionName, namespace, version, mutSnowplowState, argm
    * @param tstamp number or Timestamp object
    */
   apiMethods.trackAdClick = function (
-    targetUrl,
-    clickId,
-    costModel,
-    cost,
-    bannerId,
-    zoneId,
-    impressionId,
-    advertiserId,
-    campaignId,
-    context,
-    tstamp
+    targetUrl: string,
+    clickId: string,
+    costModel: string,
+    cost: number,
+    bannerId: string,
+    zoneId: string,
+    impressionId: string,
+    advertiserId: string,
+    campaignId: string,
+    context: Array<SelfDescribingJson>,
+    tstamp: Timestamp
   ) {
     core.trackAdClick(
       targetUrl,
@@ -1638,17 +2470,17 @@ export function Tracker(functionName, namespace, version, mutSnowplowState, argm
    * @param tstamp number or Timestamp object
    */
   apiMethods.trackAdConversion = function (
-    conversionId,
-    costModel,
-    cost,
-    category,
-    action,
-    property,
-    initialValue,
-    advertiserId,
-    campaignId,
-    context,
-    tstamp
+    conversionId: string,
+    costModel: string,
+    cost: number,
+    category: string,
+    action: string,
+    property: string,
+    initialValue: number,
+    advertiserId: string,
+    campaignId: string,
+    context: Array<SelfDescribingJson>,
+    tstamp: Timestamp
   ) {
     core.trackAdConversion(
       conversionId,
@@ -1674,7 +2506,13 @@ export function Tracker(functionName, namespace, version, mutSnowplowState, argm
    * @param object Custom context relating to the event
    * @param tstamp number or Timestamp object
    */
-  apiMethods.trackSocialInteraction = function (action, network, target, context, tstamp) {
+  apiMethods.trackSocialInteraction = function (
+    action: string,
+    network: string,
+    target: string,
+    context: Array<SelfDescribingJson>,
+    tstamp: Timestamp
+  ) {
     core.trackSocialInteraction(action, network, target, context, tstamp);
   };
 
@@ -1690,7 +2528,16 @@ export function Tracker(functionName, namespace, version, mutSnowplowState, argm
    * @param array context Optional. Context relating to the event.
    * @param tstamp number or Timestamp object
    */
-  apiMethods.trackAddToCart = function (sku, name, category, unitPrice, quantity, currency, context, tstamp) {
+  apiMethods.trackAddToCart = function (
+    sku: string,
+    name: string,
+    category: string,
+    unitPrice: string,
+    quantity: string,
+    currency: string | undefined,
+    context: Array<SelfDescribingJson>,
+    tstamp: Timestamp
+  ) {
     core.trackAddToCart(sku, name, category, unitPrice, quantity, currency, context, tstamp);
   };
 
@@ -1706,7 +2553,16 @@ export function Tracker(functionName, namespace, version, mutSnowplowState, argm
    * @param array context Optional. Context relating to the event.
    * @param tstamp Opinal number or Timestamp object
    */
-  apiMethods.trackRemoveFromCart = function (sku, name, category, unitPrice, quantity, currency, context, tstamp) {
+  apiMethods.trackRemoveFromCart = function (
+    sku: string,
+    name: string,
+    category: string,
+    unitPrice: string,
+    quantity: string,
+    currency: string | undefined,
+    context: Array<SelfDescribingJson>,
+    tstamp: Timestamp
+  ) {
     core.trackRemoveFromCart(sku, name, category, unitPrice, quantity, currency, context, tstamp);
   };
 
@@ -1720,7 +2576,14 @@ export function Tracker(functionName, namespace, version, mutSnowplowState, argm
    * @param array context Optional. Context relating to the event.
    * @param tstamp Opinal number or Timestamp object
    */
-  apiMethods.trackSiteSearch = function (terms, filters, totalResults, pageResults, context, tstamp) {
+  apiMethods.trackSiteSearch = function (
+    terms: Array<string>,
+    filters: Record<string, string | boolean>,
+    totalResults: number,
+    pageResults: number,
+    context: Array<SelfDescribingJson>,
+    tstamp: Timestamp
+  ) {
     core.trackSiteSearch(terms, filters, totalResults, pageResults, context, tstamp);
   };
 
@@ -1734,7 +2597,14 @@ export function Tracker(functionName, namespace, version, mutSnowplowState, argm
    * @param array context Optional. Context relating to the event.
    * @param tstamp Opinal number or Timestamp object
    */
-  apiMethods.trackTiming = function (category, variable, timing, label, context, tstamp) {
+  apiMethods.trackTiming = function (
+    category: string,
+    variable: string,
+    timing: number,
+    label: string,
+    context: Array<SelfDescribingJson>,
+    tstamp: Timestamp
+  ) {
     core.trackSelfDescribingEvent(
       {
         schema: 'iglu:com.snowplowanalytics.snowplow/timing/jsonschema/1-0-0',
@@ -1761,7 +2631,15 @@ export function Tracker(functionName, namespace, version, mutSnowplowState, argm
    * @param {array} [context] - Context relating to the event.
    * @param {number|Timestamp} [tstamp] - Number or Timestamp object.
    */
-  apiMethods.trackConsentWithdrawn = function (all, id, version, name, description, context, tstamp) {
+  apiMethods.trackConsentWithdrawn = function (
+    all: boolean,
+    id?: string,
+    version?: string,
+    name?: string,
+    description?: string,
+    context?: Array<SelfDescribingJson>,
+    tstamp?: Timestamp
+  ) {
     core.trackConsentWithdrawn(all, id, version, name, description, context, tstamp);
   };
 
@@ -1776,7 +2654,15 @@ export function Tracker(functionName, namespace, version, mutSnowplowState, argm
    * @param {array} [context] - Context containing consent documents.
    * @param {Timestamp|number} [tstamp] - number or Timestamp object.
    */
-  apiMethods.trackConsentGranted = function (id, version, name, description, expiry, context, tstamp) {
+  apiMethods.trackConsentGranted = function (
+    id: string,
+    version: string,
+    name: string,
+    description: string,
+    expiry: string,
+    context: Array<SelfDescribingJson>,
+    tstamp: Timestamp
+  ) {
     core.trackConsentGranted(id, version, name, description, expiry, context, tstamp);
   };
 
@@ -1788,7 +2674,11 @@ export function Tracker(functionName, namespace, version, mutSnowplowState, argm
    * @param array context Optional. Context relating to the event.
    * @param tstamp Opinal number or Timestamp object
    */
-  apiMethods.trackEnhancedEcommerceAction = function (action, context, tstamp) {
+  apiMethods.trackEnhancedEcommerceAction = function (
+    action: string,
+    context: Array<SelfDescribingJson>,
+    tstamp: Timestamp
+  ) {
     var combinedEnhancedEcommerceContexts = enhancedEcommerceContexts.concat(context || []);
     enhancedEcommerceContexts.length = 0;
 
@@ -1819,16 +2709,16 @@ export function Tracker(functionName, namespace, version, mutSnowplowState, argm
    * @param string currency
    */
   apiMethods.addEnhancedEcommerceActionContext = function (
-    id,
-    affiliation,
-    revenue,
-    tax,
-    shipping,
-    coupon,
-    list,
-    step,
-    option,
-    currency
+    id: string,
+    affiliation: string,
+    revenue: string,
+    tax: number,
+    shipping: number,
+    coupon: string,
+    list: string,
+    step: number,
+    option: string,
+    currency: string
   ) {
     enhancedEcommerceContexts.push({
       schema: 'iglu:com.google.analytics.enhanced-ecommerce/actionFieldObject/jsonschema/1-0-0',
@@ -1861,15 +2751,15 @@ export function Tracker(functionName, namespace, version, mutSnowplowState, argm
    * @param string currency
    */
   apiMethods.addEnhancedEcommerceImpressionContext = function (
-    id,
-    name,
-    list,
-    brand,
-    category,
-    variant,
-    position,
-    price,
-    currency
+    id: string,
+    name: string,
+    list: string,
+    brand: string,
+    category: string,
+    variant: string,
+    position: number,
+    price: string,
+    currency: string
   ) {
     enhancedEcommerceContexts.push({
       schema: 'iglu:com.google.analytics.enhanced-ecommerce/impressionFieldObject/jsonschema/1-0-0',
@@ -1903,17 +2793,17 @@ export function Tracker(functionName, namespace, version, mutSnowplowState, argm
    * @param string currency
    */
   apiMethods.addEnhancedEcommerceProductContext = function (
-    id,
-    name,
-    list,
-    brand,
-    category,
-    variant,
-    price,
-    quantity,
-    coupon,
-    position,
-    currency
+    id: string,
+    name: string,
+    list: string,
+    brand: string,
+    category: string,
+    variant: string,
+    price: number,
+    quantity: number,
+    coupon: string,
+    position: number,
+    currency: string
   ) {
     enhancedEcommerceContexts.push({
       schema: 'iglu:com.google.analytics.enhanced-ecommerce/productFieldObject/jsonschema/1-0-0',
@@ -1942,7 +2832,13 @@ export function Tracker(functionName, namespace, version, mutSnowplowState, argm
    * @param string position
    * @param string currency
    */
-  apiMethods.addEnhancedEcommercePromoContext = function (id, name, creative, position, currency) {
+  apiMethods.addEnhancedEcommercePromoContext = function (
+    id: string,
+    name: string,
+    creative: string,
+    position: string,
+    currency: string
+  ) {
     enhancedEcommerceContexts.push({
       schema: 'iglu:com.google.analytics.enhanced-ecommerce/promoFieldObject/jsonschema/1-0-0',
       data: {
@@ -1960,7 +2856,7 @@ export function Tracker(functionName, namespace, version, mutSnowplowState, argm
    *
    * @param contexts Array<ContextPrimitive | ConditionalContextProvider>
    */
-  apiMethods.addGlobalContexts = function (contexts) {
+  apiMethods.addGlobalContexts = function (contexts: Array<ConditionalContextProvider | ContextPrimitive>) {
     core.addGlobalContexts(contexts);
   };
 
@@ -1969,7 +2865,7 @@ export function Tracker(functionName, namespace, version, mutSnowplowState, argm
    *
    * @param contexts Array<ContextPrimitive | ConditionalContextProvider>
    */
-  apiMethods.removeGlobalContexts = function (contexts) {
+  apiMethods.removeGlobalContexts = function (contexts: Array<ConditionalContextProvider | ContextPrimitive>) {
     core.removeGlobalContexts(contexts);
   };
 
@@ -1993,7 +2889,7 @@ export function Tracker(functionName, namespace, version, mutSnowplowState, argm
    * falls back to one defined in initial config, otherwise uses cookieAndLocalStorage.
    * @param {string} stateStorageStrategy - Override for state storage
    */
-  apiMethods.disableAnonymousTracking = function (stateStorageStrategy) {
+  apiMethods.disableAnonymousTracking = function (stateStorageStrategy?: string) {
     if (stateStorageStrategy) {
       argmap.stateStorageStrategy = stateStorageStrategy;
       argmap.anonymousTracking = false;
@@ -2019,7 +2915,7 @@ export function Tracker(functionName, namespace, version, mutSnowplowState, argm
   /**
    * Enables anonymous tracking (ie. tracker initialized without `anonymousTracking`)
    */
-  apiMethods.enableAnonymousTracking = function (anonymousArgs) {
+  apiMethods.enableAnonymousTracking = function (anonymousArgs?: AnonymousTrackingOptions) {
     argmap.anonymousTracking = anonymousArgs || true;
 
     configAnonymousTracking = getAnonymousTracking(argmap);
@@ -2039,14 +2935,9 @@ export function Tracker(functionName, namespace, version, mutSnowplowState, argm
    */
   apiMethods.clearUserData = deleteCookies;
 
-  apiMethods.setDebug = function (isDebug) {
-    debug = Boolean(isDebug).valueOf();
-    updateReturnMethods();
-  };
-
   // Create guarded methods from apiMethods,
   // and set returnMethods to apiMethods or safeMethods depending on value of debug
-  const combinedApiMethods = apiPlugins.reduce((prev, current) => {
+  const combinedApiMethods = (apiPlugins as Array<BrowserApiPlugin<ApiMethods>>).reduce((prev, current) => {
     if (current.initialise) {
       current.initialise(core, trackerId, mutSnowplowState);
     }
@@ -2054,9 +2945,14 @@ export function Tracker(functionName, namespace, version, mutSnowplowState, argm
       ...prev,
       ...current.apiMethods,
     };
-  }, apiMethods);
+  }, apiMethods) as TrackerApi;
   safeMethods = productionize(combinedApiMethods);
-  updateReturnMethods();
 
-  return returnMethods;
+  if (debug) {
+    returnMethods = apiMethods as TrackerApi;
+  } else {
+    returnMethods = safeMethods;
+  }
+
+  return returnMethods as TrackerApi;
 }

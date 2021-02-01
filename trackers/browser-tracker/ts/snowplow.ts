@@ -38,14 +38,15 @@
  * Get the name of the global input function
  */
 
-import { Tracker } from './tracker';
+export { TrackerApi } from './tracker';
+import { Tracker, TrackerApi } from './tracker';
 import { version } from './version';
 import { DetectScreen, DetectWindow, DetectDocument } from '@snowplow/browser-detectors';
-import { warn, SharedState } from '@snowplow/browser-core';
+import { warn, newSharedState, SharedState } from '@snowplow/browser-core';
 import pickBy from 'lodash/pickBy';
 import includes from 'lodash/includes';
 
-const groups = {};
+const groups: Record<string, { state: SharedState; trackers: Record<string, TrackerApi> }> = {};
 const defaultDetectors = {
   screen: DetectScreen(),
   window: DetectWindow(),
@@ -60,16 +61,22 @@ const defaultDetectors = {
  * @param object argmap contains the initialisation options of the JavaScript tracker
  * @param string trackerGroup used to group multiple trackers and shared state together
  */
-export const newTracker = (name, endpoint, argmap = { detectors: defaultDetectors }, trackerGroup = 'snowplow') => {
+export const newTracker = (
+  name: string,
+  endpoint: string,
+  argmap: Record<string, unknown> = {},
+  trackerGroup = 'snowplow'
+) => {
   if (!groups.hasOwnProperty(trackerGroup)) {
-    groups[trackerGroup] = { state: new SharedState(), trackers: {} };
+    groups[trackerGroup] = { state: newSharedState(), trackers: {} };
   }
 
+  argmap.detectors = argmap.detectors ?? defaultDetectors;
   const trackerDictionary = groups[trackerGroup].trackers;
   const state = groups[trackerGroup].state;
 
   if (!trackerDictionary.hasOwnProperty(name)) {
-    trackerDictionary[name] = new Tracker(trackerGroup, name, version, state, argmap);
+    trackerDictionary[name] = Tracker(trackerGroup, name, version, state, argmap);
     trackerDictionary[name].setCollectorUrl(endpoint);
   } else {
     warn('Tracker namespace ' + name + ' already exists.');
@@ -78,19 +85,19 @@ export const newTracker = (name, endpoint, argmap = { detectors: defaultDetector
   return trackerDictionary[name];
 };
 
-export const getTracker = (namespace, trackerGroup = 'snowplow') => {
-  if (groups.hasOwnProperty(trackerGroup) && groups[trackerGroup].trackers.hasOwnProperty(namespace)) {
-    return groups[trackerGroup].trackers[namespace];
+export const getTracker = (name: string, trackerGroup = 'snowplow') => {
+  if (groups.hasOwnProperty(trackerGroup) && groups[trackerGroup].trackers.hasOwnProperty(name)) {
+    return groups[trackerGroup].trackers[name];
   }
 
   warn('Warning: No tracker configured');
   return null;
 };
 
-export const getTrackers = (namespaces, trackerGroup = 'snowplow') => {
+export const getTrackers = (names: Array<string>, trackerGroup = 'snowplow'): Record<string, TrackerApi> => {
   if (groups.hasOwnProperty(trackerGroup)) {
     return pickBy(groups[trackerGroup].trackers, (_, key) => {
-      return includes(namespaces, key);
+      return includes(names, key);
     });
   }
 

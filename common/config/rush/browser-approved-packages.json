@@ -131,16 +131,20 @@
       "allowedCategories": [ "libraries", "plugins" ]
     },
     {
+      "name": "@types/sha1",
+      "allowedCategories": [ "trackers" ]
+    },
+    {
       "name": "@types/uuid",
-      "allowedCategories": [ "libraries" ]
+      "allowedCategories": [ "libraries", "trackers" ]
     },
     {
       "name": "@typescript-eslint/eslint-plugin",
-      "allowedCategories": [ "libraries", "plugins" ]
+      "allowedCategories": [ "libraries", "plugins", "trackers" ]
     },
     {
       "name": "@typescript-eslint/parser",
-      "allowedCategories": [ "libraries", "plugins" ]
+      "allowedCategories": [ "libraries", "plugins", "trackers" ]
     },
     {
       "name": "@wdio/cli",
@@ -172,7 +176,7 @@
     },
     {
       "name": "@wessberg/rollup-plugin-ts",
-      "allowedCategories": [ "libraries", "plugins" ]
+      "allowedCategories": [ "libraries", "plugins", "trackers" ]
     },
     {
       "name": "ava",
@@ -188,7 +192,7 @@
     },
     {
       "name": "eslint",
-      "allowedCategories": [ "libraries", "plugins" ]
+      "allowedCategories": [ "libraries", "plugins", "trackers" ]
     },
     {
       "name": "gulp",
@@ -248,15 +252,15 @@
     },
     {
       "name": "ts-node",
-      "allowedCategories": [ "libraries", "plugins" ]
+      "allowedCategories": [ "libraries", "plugins", "trackers" ]
     },
     {
       "name": "tslib",
-      "allowedCategories": [ "libraries", "plugins" ]
+      "allowedCategories": [ "libraries", "plugins", "trackers" ]
     },
     {
       "name": "typescript",
-      "allowedCategories": [ "libraries", "plugins" ]
+      "allowedCategories": [ "libraries", "plugins", "trackers" ]
     },
     {
       "name": "uuid",

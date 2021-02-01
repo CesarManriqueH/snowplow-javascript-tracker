@@ -34,8 +34,12 @@
 
 import map from 'lodash/map';
 import { warn, isFunction } from '@snowplow/browser-core';
-import { newTracker, getTracker, allTrackers } from '@snowplow/browser-tracker';
+import { newTracker, getTracker, allTrackers, TrackerApi } from '@snowplow/browser-tracker';
 import { Plugins, Detectors } from './features';
+
+export interface Queue {
+  push: (...args: any[]) => void;
+}
 
 /************************************************************
  * Proxy object
@@ -43,20 +47,21 @@ import { Plugins, Detectors } from './features';
  *   after the Tracker has been initialized and loaded
  ************************************************************/
 
-export function InQueueManager(functionName, asyncQueue) {
+export function InQueueManager(functionName: string, asyncQueue: Array<unknown>): Queue {
   /**
    * Get an array of trackers to which a function should be applied.
    *
    * @param array names List of namespaces to use. If empty, use all namespaces.
    */
-  function getNamedTrackers(names) {
-    var namedTrackers = [];
+  function getNamedTrackers(names: Array<string>) {
+    var namedTrackers: Array<TrackerApi> = [];
 
     if (!names || names.length === 0) {
       namedTrackers = map(allTrackers(functionName));
     } else {
       for (var i = 0; i < names.length; i++) {
-        namedTrackers.push(getTracker(names[i], functionName));
+        const tracker = getTracker(names[i], functionName);
+        if (tracker) namedTrackers.push(tracker);
       }
     }
 
@@ -72,7 +77,7 @@ export function InQueueManager(functionName, asyncQueue) {
    *
    * @param string inputString
    */
-  function parseInputString(inputString) {
+  function parseInputString(inputString: string): [string, string[]] {
     var separatedString = inputString.split(':'),
       extractedFunction = separatedString[0],
       extractedNames = separatedString.length > 1 ? separatedString[1].split(';') : [];
@@ -88,12 +93,12 @@ export function InQueueManager(functionName, asyncQueue) {
    * or:
    *      [ functionObject, optional_parameters ]
    */
-  function applyAsyncFunction() {
+  function applyAsyncFunction(...args: any[]) {
     var i, j, f, parameterArray, input, parsedString, names, namedTrackers;
 
     // Outer loop in case someone push'es in zarg of arrays
-    for (i = 0; i < arguments.length; i += 1) {
-      parameterArray = arguments[i];
+    for (i = 0; i < args.length; i += 1) {
+      parameterArray = args[i];
 
       // Arguments is not an array, so we turn it into one
       input = Array.prototype.shift.call(parameterArray);

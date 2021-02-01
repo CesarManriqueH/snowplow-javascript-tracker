@@ -17,6 +17,6 @@ export const detectors = {
   screen: true,
   window: true,
   document: true,
-  timezone: false,
-  browserFeatures: false,
+  timezone: true,
+  browserFeatures: true,
 };

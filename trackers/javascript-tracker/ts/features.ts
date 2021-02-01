@@ -17,9 +17,9 @@ import {
   DetectTimezone,
   DetectBrowserFeatures,
 } from '@snowplow/browser-detectors';
-import { plugins } from '../../tracker.config';
-import { detectors } from '../../tracker.config';
-export function Plugins(argmap) {
+import { plugins, detectors } from '../tracker.config';
+
+export function Plugins(argmap: any) {
   const {
       performanceTiming,
       gaCookies,
@@ -113,9 +113,9 @@ export function Plugins(argmap) {
   };
 }
 
-export function Detectors(argmap) {
+export function Detectors(argmap: any) {
   const { cookie, screen, window, document, timezone, browserFeatures } = argmap.detectors || {},
-    selectedDetectors = {};
+    selectedDetectors: any = {};
 
   if (detectors.cookie && (cookie ?? true)) {
     selectedDetectors.cookie = DetectCookie();
