@@ -1,6 +1,6 @@
 import test, { ExecutionContext } from 'ava';
-import { trackerCore } from '../../src/core';
-import { PayloadBuilder, Payload } from '../../src/payload';
+import { trackerCore } from '../src/core';
+import { PayloadBuilder, Payload } from '../src/payload';
 
 const selfDescribingEventSchema = 'iglu:com.snowplowanalytics.snowplow/unstruct_event/jsonschema/1-0-0';
 const tracker = trackerCore(false);

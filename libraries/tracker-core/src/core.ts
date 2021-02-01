@@ -14,7 +14,6 @@
  */
 
 import { v4 } from 'uuid';
-
 import { ContextPlugin } from './plugins';
 import { payloadBuilder, PayloadBuilder, Payload, isJson } from './payload';
 import {

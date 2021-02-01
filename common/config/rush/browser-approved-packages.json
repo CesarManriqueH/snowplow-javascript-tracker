@@ -47,6 +47,10 @@
       "allowedCategories": [ "trackers" ]
     },
     {
+      "name": "@snowplow/browser-environment",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "@snowplow/browser-helpers",
       "allowedCategories": [ "plugins", "trackers" ]
     },
@@ -119,6 +123,10 @@
       "allowedCategories": [ "trackers" ]
     },
     {
+      "name": "@types/jsdom-global",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "@types/jstimezonedetect",
       "allowedCategories": [ "libraries", "plugins", "trackers" ]
     },
@@ -183,6 +191,14 @@
       "allowedCategories": [ "libraries", "plugins" ]
     },
     {
+      "name": "browser-env",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "browser-environment",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "chromedriver",
       "allowedCategories": [ "trackers" ]
     },
@@ -207,12 +223,24 @@
       "allowedCategories": [ "trackers" ]
     },
     {
+      "name": "jsdom",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "jsdom-global",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "jstimezonedetect",
       "allowedCategories": [ "libraries", "plugins", "trackers" ]
     },
     {
       "name": "lodash",
       "allowedCategories": [ "libraries", "plugins", "trackers" ]
+    },
+    {
+      "name": "lodash-es",
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "moment-timezone",

@@ -14,7 +14,7 @@
  */
 
 import test from 'ava';
-import { isJson, isNonEmptyJson, payloadBuilder } from '../../src/payload';
+import { isJson, isNonEmptyJson, payloadBuilder } from '../src/payload';
 
 const sampleJson = {
   schema: 'iglu:com.snowplowanalytics.snowplow/contexts/jsonschema/1-0-0',
@@ -62,7 +62,8 @@ test('non-JSON Payload doesnt identify as JSON', (t) => {
   const nonJson = function () {
     return {};
   };
-  t.is(isJson(nonJson), false);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  t.is(isJson(nonJson as any), false);
 });
 
 test('Empty Payload identifies as an empty JSON', (t) => {

@@ -6,8 +6,8 @@ import { builtinModules } from 'module';
 export default [
   // CommonJS (for Node) and ES module (for bundlers) build.
   {
-    input: './src/index.ts',
-    external: [/^lodash/, ...builtinModules, ...Object.keys(pkg.dependencies), ...Object.keys(pkg.devDependencies)],
+    input: './ts/index.ts',
+    external: [...builtinModules, ...Object.keys(pkg.dependencies), ...Object.keys(pkg.devDependencies)],
     plugins: [
       ts(), // so Rollup can convert TypeScript to JavaScript
     ],

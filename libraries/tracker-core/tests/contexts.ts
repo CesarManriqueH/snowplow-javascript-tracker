@@ -14,9 +14,9 @@
  */
 
 import test from 'ava';
-import * as contexts from '../../src/contexts';
-import { payloadBuilder, Payload } from '../../src/payload';
-import { SelfDescribingJson } from '../../src/core';
+import * as contexts from '../src/contexts';
+import { payloadBuilder, Payload } from '../src/payload';
+import { SelfDescribingJson } from '../src/core';
 
 test('Identify context primitives', (t) => {
   const geolocationContext = {

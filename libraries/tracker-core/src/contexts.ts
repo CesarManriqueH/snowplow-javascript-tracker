@@ -17,15 +17,7 @@ import { PayloadBuilder, Payload, isNonEmptyJson } from './payload';
 import { SelfDescribingJson } from './core';
 import { base64urldecode } from './base64';
 import { ContextPlugin } from './plugins';
-
-// Must import lodash as submodules (https://github.com/rollup/rollup/wiki/Troubleshooting#tree-shaking-doesnt-seem-to-be-working)
-import isEqual from 'lodash/isEqual';
-import has from 'lodash/has';
-import get from 'lodash/get';
-import every from 'lodash/every';
-import compact from 'lodash/compact';
-import map from 'lodash/map';
-import isPlainObject from 'lodash/isPlainObject';
+import { isEqual, has, get, every, compact, map, isPlainObject } from 'lodash';
 
 /**
  * An interface for wrapping the Context Generator arguments

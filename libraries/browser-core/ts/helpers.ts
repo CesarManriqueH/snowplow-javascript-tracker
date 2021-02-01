@@ -31,11 +31,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-import compact from 'lodash/compact';
-import isString from 'lodash/isString';
-import isUndefined from 'lodash/isUndefined';
-import isObject from 'lodash/isObject';
-import map from 'lodash/map';
+import { compact, isString, isUndefined, isObject, map } from 'lodash';
 import { SelfDescribingJson } from '@snowplow/tracker-core';
 
 declare global {

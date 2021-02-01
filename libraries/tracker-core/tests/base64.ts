@@ -14,7 +14,7 @@
  */
 
 import test from 'ava';
-import { base64encode } from '../../src/base64';
+import { base64encode } from '../src/base64';
 
 test('Base 64 encode a string', (t) => {
   t.is(base64encode('my_string'), 'bXlfc3RyaW5n', 'Base64-encode a string');
