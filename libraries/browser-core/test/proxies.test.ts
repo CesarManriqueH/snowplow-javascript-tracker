@@ -32,18 +32,16 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import { fixupUrl } from '../../src/js/lib/proxies';
+import { fixupUrl } from '../ts/proxies';
 
 describe('Proxies', () => {
   beforeAll(() => {
-    document.body.innerHTML =
-      '<div><div><div><div><div><div>You have reached the cached page for</div></div></div></div></div></div><a href="http://www.example.com/">';
+    document.body.innerHTML = '<div>You have reached the cached page for</div><a href="http://www.example.com/">';
   });
 
   it('Host name is not a special case, Except in special cases, fixupUrl changes nothing', () => {
-    const initialLocationArray = ['normalhostname', 'href', 'http://referrer.com'];
-    const fixedupLocationArray = fixupUrl.apply(null, initialLocationArray);
-    const expectedLocationArray = fixedupLocationArray;
+    const expectedLocationArray = ['normalhostname', 'href', 'http://referrer.com'];
+    const fixedupLocationArray = fixupUrl('normalhostname', 'href', 'http://referrer.com');
 
     for (let i = 0; i < 3; i++) {
       expect(fixedupLocationArray[i]).toEqual(expectedLocationArray[i]);
@@ -51,12 +49,11 @@ describe('Proxies', () => {
   });
 
   it("Host name = 'translate.googleusercontent.com', Get the URL for the untranslated page from the querystring and make the translated page the referrer", () => {
-    const initialLocationArray = [
+    const fixedupLocationArray = fixupUrl(
       'translate.googleusercontent.com',
       'http://translate.googleusercontent.com/translate?hl=en&sl=fr&u=http:www.francais.fr/path',
-      '',
-    ];
-    const fixedupLocationArray = fixupUrl.apply(null, initialLocationArray);
+      ''
+    );
     const expectedLocationArray = [
       'www.francais.fr',
       'http:www.francais.fr/path',
@@ -69,12 +66,11 @@ describe('Proxies', () => {
   });
 
   it("Host name = 'ccj.bingj.com', On a page cached by Bing, get the original URL from the first link", () => {
-    const initialLocationArray = [
+    const fixedupLocationArray = fixupUrl(
       'cc.bingj.com',
       'http://cc.bingj.com/cache.aspx?q=example.com&d=4870936571937837&mkt=en-GB&setlang=en-GB&w=QyOPD1fo3C2nC9sXMLmUUs81Jt78MYIp',
-      'http://referrer.com',
-    ];
-    const fixedupLocationArray = fixupUrl.apply(null, initialLocationArray);
+      'http://referrer.com'
+    );
     const expectedLocationArray = ['www.example.com', 'http://www.example.com/', 'http://referrer.com'];
 
     for (let i = 0; i < 3; i++) {
@@ -83,12 +79,11 @@ describe('Proxies', () => {
   });
 
   it("Host name = 'webcache.googleusercontent.com', On a page cached by Google, get the original URL from the first link", () => {
-    const initialLocationArray = [
+    const fixedupLocationArray = fixupUrl(
       'webcache.googleusercontent.com',
       'http://webcache.googleusercontent.com/search?q=cache:http://example.com/#fragment',
-      'http://referrer.com',
-    ];
-    const fixedupLocationArray = fixupUrl.apply(null, initialLocationArray);
+      'http://referrer.com'
+    );
     const expectedLocationArray = ['www.example.com', 'http://www.example.com/', 'http://referrer.com'];
 
     for (let i = 0; i < 3; i++) {

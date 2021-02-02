@@ -32,7 +32,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import { decorateQuerystring, resolveDynamicContexts, getCssClasses } from '../../src/js/lib/helpers';
+import { decorateQuerystring, resolveDynamicContexts, getCssClasses } from '../ts/helpers';
 
 describe('decorateQuerystring', () => {
   it('Decorate a URL with no querystring or fragment', () => {
@@ -96,7 +96,7 @@ describe('getCssClasses', () => {
   it("Tokenize a DOM element's className field", () => {
     const element = {
       className: '   the  quick   brown_fox-jumps/over\nthe\t\tlazy   dog  ',
-    };
+    } as Element;
     const expected = ['the', 'quick', 'brown_fox-jumps/over', 'the', 'lazy', 'dog'];
     const actual = getCssClasses(element);
     expect(actual).toEqual(expected);
@@ -121,7 +121,7 @@ describe('resolveDynamicContexts', () => {
   });
 
   it('Resolves context generators with arguments', () => {
-    const contextGenerator = (argOne, argTwo) => ({
+    const contextGenerator = (argOne: string, argTwo: string) => ({
       schema: 'iglu:com.acme.marketing/some_event/jsonschema/1-0-0',
       data: {
         firstVal: argOne,

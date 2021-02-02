@@ -30,7 +30,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import { attemptGetLocalStorage, attemptWriteLocalStorage } from '../../src/js/lib/helpers';
+import { attemptGetLocalStorage, attemptWriteLocalStorage } from '../ts/helpers';
 
 describe('local storage', () => {
   beforeAll(() => {

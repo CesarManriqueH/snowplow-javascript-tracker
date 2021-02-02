@@ -4,48 +4,46 @@ importers:
   ../../libraries/browser-core:
     dependencies:
       '@snowplow/tracker-core': 'link:../tracker-core'
-      lodash-es: 4.17.20
+      lodash: 4.17.20
       tslib: 2.0.3
     devDependencies:
-      '@types/jsdom-global': 3.0.2
-      '@types/lodash': 4.14.167
+      '@types/jest': 26.0.20
+      '@types/lodash': 4.14.168
       '@types/node': 14.14.14
       '@typescript-eslint/eslint-plugin': 4.11.0_1b9a0c47bb6bc72fe9ec08ec801e03a4
       '@typescript-eslint/parser': 4.11.0_eslint@7.16.0+typescript@4.1.3
       '@wessberg/rollup-plugin-ts': 1.3.8_rollup@2.35.1+typescript@4.1.3
       ava: 3.14.0
       eslint: 7.16.0
-      jsdom: 16.4.0
-      jsdom-global: 3.0.2_jsdom@16.4.0
+      jest: 26.6.3
       prettier: 2.2.1
       rollup: 2.35.1
-      ts-node: 9.1.1_typescript@4.1.3
+      ts-jest: 26.5.0_jest@26.6.3+typescript@4.1.3
       typescript: 4.1.3
     specifiers:
       '@snowplow/tracker-core': 'workspace:*'
-      '@types/jsdom-global': ~3.0.2
-      '@types/lodash': ^4.14.167
+      '@types/jest': ^26.0.20
+      '@types/lodash': ^4.14.168
       '@types/node': ^14.6.0
       '@typescript-eslint/eslint-plugin': ^4.9.0
       '@typescript-eslint/parser': ^4.9.0
       '@wessberg/rollup-plugin-ts': ^1.3.8
       ava: ^3.13.0
       eslint: ^7.7.0
-      jsdom: ~16.4.0
-      jsdom-global: ~3.0.2
-      lodash-es: ^4.17.20
+      jest: ^26.6.3
+      lodash: ^4.17.20
       prettier: ^2.1.1
       rollup: ^2.34.0
-      ts-node: ^9.0.0
+      ts-jest: ^26.5.0
       tslib: ^2.0.3
       typescript: ^4.1.2
   ../../libraries/tracker-core:
     dependencies:
-      lodash-es: 4.17.20
+      lodash: 4.17.20
       tslib: 2.0.3
       uuid: 3.4.0
     devDependencies:
-      '@types/lodash': 4.14.167
+      '@types/lodash': 4.14.168
       '@types/node': 14.14.14
       '@types/uuid': 3.4.9
       '@typescript-eslint/eslint-plugin': 4.11.0_1b9a0c47bb6bc72fe9ec08ec801e03a4
@@ -58,7 +56,7 @@ importers:
       ts-node: 9.1.1_typescript@4.1.3
       typescript: 4.1.3
     specifiers:
-      '@types/lodash': ^4.14.167
+      '@types/lodash': ^4.14.168
       '@types/node': ^14.6.0
       '@types/uuid': ^3.4.6
       '@typescript-eslint/eslint-plugin': ^4.9.0
@@ -66,7 +64,7 @@ importers:
       '@wessberg/rollup-plugin-ts': ^1.3.8
       ava: ^3.13.0
       eslint: ^7.7.0
-      lodash-es: ^4.17.20
+      lodash: ^4.17.20
       prettier: ^2.1.1
       rollup: ^2.34.0
       ts-node: ^9.0.0
@@ -82,7 +80,7 @@ importers:
       tslib: 2.0.3
     devDependencies:
       '@types/jstimezonedetect': 1.0.3
-      '@types/lodash': 4.14.167
+      '@types/lodash': 4.14.168
       '@types/node': 14.14.14
       '@typescript-eslint/eslint-plugin': 4.11.0_1b9a0c47bb6bc72fe9ec08ec801e03a4
       '@typescript-eslint/parser': 4.11.0_eslint@7.16.0+typescript@4.1.3
@@ -97,7 +95,7 @@ importers:
       '@snowplow/browser-core': 'workspace:*'
       '@snowplow/tracker-core': 'workspace:*'
       '@types/jstimezonedetect': ~1.0.3
-      '@types/lodash': ^4.14.167
+      '@types/lodash': ^4.14.168
       '@types/node': ^14.6.0
       '@typescript-eslint/eslint-plugin': ^4.9.0
       '@typescript-eslint/parser': ^4.9.0
@@ -176,7 +174,7 @@ importers:
       lodash: 4.17.20
       tslib: 2.0.3
     devDependencies:
-      '@types/lodash': 4.14.167
+      '@types/lodash': 4.14.168
       '@types/node': 14.14.14
       '@typescript-eslint/eslint-plugin': 4.11.0_1b9a0c47bb6bc72fe9ec08ec801e03a4
       '@typescript-eslint/parser': 4.11.0_eslint@7.16.0+typescript@4.1.3
@@ -190,7 +188,7 @@ importers:
     specifiers:
       '@snowplow/browser-core': 'workspace:*'
       '@snowplow/tracker-core': 'workspace:*'
-      '@types/lodash': ^4.14.167
+      '@types/lodash': ^4.14.168
       '@types/node': ^14.6.0
       '@typescript-eslint/eslint-plugin': ^4.9.0
       '@typescript-eslint/parser': ^4.9.0
@@ -210,7 +208,7 @@ importers:
       lodash: 4.17.20
       tslib: 2.0.3
     devDependencies:
-      '@types/lodash': 4.14.167
+      '@types/lodash': 4.14.168
       '@types/node': 14.14.14
       '@typescript-eslint/eslint-plugin': 4.11.0_1b9a0c47bb6bc72fe9ec08ec801e03a4
       '@typescript-eslint/parser': 4.11.0_eslint@7.16.0+typescript@4.1.3
@@ -224,7 +222,7 @@ importers:
     specifiers:
       '@snowplow/browser-core': 'workspace:*'
       '@snowplow/tracker-core': 'workspace:*'
-      '@types/lodash': ^4.14.167
+      '@types/lodash': ^4.14.168
       '@types/node': ^14.6.0
       '@typescript-eslint/eslint-plugin': ^4.9.0
       '@typescript-eslint/parser': ^4.9.0
@@ -304,7 +302,7 @@ importers:
       lodash: 4.17.20
       tslib: 2.0.3
     devDependencies:
-      '@types/lodash': 4.14.167
+      '@types/lodash': 4.14.168
       '@types/node': 14.14.14
       '@typescript-eslint/eslint-plugin': 4.11.0_1b9a0c47bb6bc72fe9ec08ec801e03a4
       '@typescript-eslint/parser': 4.11.0_eslint@7.16.0+typescript@4.1.3
@@ -318,7 +316,7 @@ importers:
     specifiers:
       '@snowplow/browser-core': 'workspace:*'
       '@snowplow/tracker-core': 'workspace:*'
-      '@types/lodash': ^4.14.167
+      '@types/lodash': ^4.14.168
       '@types/node': ^14.6.0
       '@typescript-eslint/eslint-plugin': ^4.9.0
       '@typescript-eslint/parser': ^4.9.0
@@ -338,7 +336,7 @@ importers:
       lodash: 4.17.20
       tslib: 2.0.3
     devDependencies:
-      '@types/lodash': 4.14.167
+      '@types/lodash': 4.14.168
       '@types/node': 14.14.14
       '@typescript-eslint/eslint-plugin': 4.11.0_1b9a0c47bb6bc72fe9ec08ec801e03a4
       '@typescript-eslint/parser': 4.11.0_eslint@7.16.0+typescript@4.1.3
@@ -352,7 +350,7 @@ importers:
     specifiers:
       '@snowplow/browser-core': 'workspace:*'
       '@snowplow/tracker-core': 'workspace:*'
-      '@types/lodash': ^4.14.167
+      '@types/lodash': ^4.14.168
       '@types/node': ^14.6.0
       '@typescript-eslint/eslint-plugin': ^4.9.0
       '@typescript-eslint/parser': ^4.9.0
@@ -372,7 +370,7 @@ importers:
       lodash: 4.17.20
       tslib: 2.0.3
     devDependencies:
-      '@types/lodash': 4.14.167
+      '@types/lodash': 4.14.168
       '@types/node': 14.14.14
       '@typescript-eslint/eslint-plugin': 4.11.0_1b9a0c47bb6bc72fe9ec08ec801e03a4
       '@typescript-eslint/parser': 4.11.0_eslint@7.16.0+typescript@4.1.3
@@ -386,7 +384,7 @@ importers:
     specifiers:
       '@snowplow/browser-core': 'workspace:*'
       '@snowplow/tracker-core': 'workspace:*'
-      '@types/lodash': ^4.14.167
+      '@types/lodash': ^4.14.168
       '@types/node': ^14.6.0
       '@typescript-eslint/eslint-plugin': ^4.9.0
       '@typescript-eslint/parser': ^4.9.0
@@ -474,7 +472,7 @@ importers:
       '@rollup/plugin-json': 4.1.0_rollup@2.35.1
       '@rollup/plugin-node-resolve': 11.0.1_rollup@2.35.1
       '@types/jest': 26.0.19
-      '@types/lodash': 4.14.167
+      '@types/lodash': 4.14.168
       '@typescript-eslint/eslint-plugin': 4.11.0_1b9a0c47bb6bc72fe9ec08ec801e03a4
       '@typescript-eslint/parser': 4.11.0_eslint@7.16.0+typescript@4.1.3
       '@wessberg/rollup-plugin-ts': 1.3.8_rollup@2.35.1+typescript@4.1.3
@@ -496,7 +494,7 @@ importers:
       '@snowplow/browser-detectors': 'workspace:*'
       '@snowplow/tracker-core': 'workspace:*'
       '@types/jest': ^26.0.15
-      '@types/lodash': ^4.14.167
+      '@types/lodash': ^4.14.168
       '@types/sha1': ~1.1.2
       '@types/uuid': ^3.4.6
       '@typescript-eslint/eslint-plugin': ^4.9.0
@@ -540,7 +538,7 @@ importers:
       '@rollup/plugin-json': 4.1.0_rollup@2.35.1
       '@rollup/plugin-node-resolve': 11.0.1_rollup@2.35.1
       '@types/jest': 26.0.19
-      '@types/lodash': 4.14.167
+      '@types/lodash': 4.14.168
       '@wdio/cli': 6.10.11
       '@wdio/jasmine-framework': 6.10.11_@wdio+cli@6.10.11
       '@wdio/local-runner': 6.10.13_@wdio+cli@6.10.11
@@ -585,7 +583,7 @@ importers:
       '@snowplow/browser-tracker': 'workspace:*'
       '@snowplow/tracker-core': 'workspace:*'
       '@types/jest': ^26.0.15
-      '@types/lodash': ^4.14.167
+      '@types/lodash': ^4.14.168
       '@wdio/cli': ^6.10.5
       '@wdio/jasmine-framework': ^6.10.4
       '@wdio/local-runner': ^6.10.5
@@ -2190,20 +2188,13 @@ packages:
     dev: true
     resolution:
       integrity: sha512-jqHoirTG61fee6v6rwbnEuKhpSKih0tuhqeFbCmMmErhtu3BYlOZaXWjffgOstMM4S/3iQD31lI5bGLTrs97yQ==
-  /@types/jsdom-global/3.0.2:
+  /@types/jest/26.0.20:
     dependencies:
-      '@types/jsdom': 16.2.6
+      jest-diff: 26.6.2
+      pretty-format: 26.6.2
     dev: true
     resolution:
-      integrity: sha512-CFIPEDpO5vQWdQrVXrdSR2j5giiDuyb0hzZD04OJqMfizt7sh6WoqaLBdnP4w74yHDDcQkc0k5TzrXffhua3Jg==
-  /@types/jsdom/16.2.6:
-    dependencies:
-      '@types/node': 14.14.14
-      '@types/parse5': 6.0.0
-      '@types/tough-cookie': 4.0.0
-    dev: true
-    resolution:
-      integrity: sha512-yQA+HxknGtW9AkRTNyiSH3OKW5V+WzO8OPTdne99XwJkYC+KYxfNIcoJjeiSqP3V00PUUpFP6Myoo9wdIu78DQ==
+      integrity: sha512-9zi2Y+5USJRxd0FsahERhBwlcvFh6D2GLQnY2FH2BzK8J9s9omvNHIbvABwIluXa0fD8XVKMLTO0aOEuUfACAA==
   /@types/json-schema/7.0.6:
     dev: true
     resolution:
@@ -2270,6 +2261,10 @@ packages:
     dev: true
     resolution:
       integrity: sha512-w7tQPjARrvdeBkX/Rwg95S592JwxqOjmms3zWQ0XZgSyxSLdzWaYH3vErBhdVS/lRBX7F8aBYcYJYTr5TMGOzw==
+  /@types/lodash/4.14.168:
+    dev: true
+    resolution:
+      integrity: sha512-oVfRvqHV/V6D1yifJbVRU3TMp8OT6o6BG+U9MkwuJ3U8/CsDHvalRpsxBqivn71ztOFZBTfJMvETbqHiaNSj7Q==
   /@types/mime/2.0.3:
     dev: true
     resolution:
@@ -2295,10 +2290,6 @@ packages:
     dev: true
     resolution:
       integrity: sha512-/tuN8jDbOXcPk+VzEVZzzAgw1Byz7s/itb2YI10qkSyy6nykJH02DuhfrflxVdAdE7AZ91h5X6Cn0dmVdFw2TQ==
-  /@types/parse5/6.0.0:
-    dev: true
-    resolution:
-      integrity: sha512-oPwPSj4a1wu9rsXTEGIJz91ISU725t0BmSnUhb57sI+M8XEmvUop84lzuiYdq0Y5M6xLY8DBPg0C2xEQKLyvBA==
   /@types/prettier/2.1.5:
     dev: true
     resolution:
@@ -2374,10 +2365,6 @@ packages:
     dev: true
     resolution:
       integrity: sha512-FvnCJljyxhPM3gkRgWmxmDZyAQSiBQQWLI0A0VFL0K7W1oRUrPJSqNO0NvTnLkBcotdlp3lKvaT0JrnyRDkzOg==
-  /@types/tough-cookie/4.0.0:
-    dev: true
-    resolution:
-      integrity: sha512-I99sngh224D0M7XgW1s120zxCt3VYQ3IQsuw3P3jbq5GG4yc79+ZjyKznyOGIQrflfylLgcfekeZW/vk0yng6A==
   /@types/ua-parser-js/0.7.35:
     dev: true
     resolution:
@@ -3640,6 +3627,14 @@ packages:
     hasBin: true
     resolution:
       integrity: sha512-/j6k8R0p3nxOC6kx5JGAxsnhc9ixaWJfYc+TNTzxg6+ARaESAvQGV7h0uNOB4t+pLQJZWzcrMxXOxjgsCj3dqQ==
+  /bs-logger/0.2.6:
+    dependencies:
+      fast-json-stable-stringify: 2.1.0
+    dev: true
+    engines:
+      node: '>= 6'
+    resolution:
+      integrity: sha512-pd8DCoxmbgc7hyPKOvxtqNcjYoOsABPQdcCUjGp3d42VR2CX1ORhk2A87oqqu5R1kk+76nsxZupkmyd+MVtCog==
   /bser/2.1.1:
     dependencies:
       node-int64: 0.4.0
@@ -7704,14 +7699,6 @@ packages:
     dev: true
     resolution:
       integrity: sha1-peZUwuWi3rXyAdls77yoDA7y9RM=
-  /jsdom-global/3.0.2_jsdom@16.4.0:
-    dependencies:
-      jsdom: 16.4.0
-    dev: true
-    peerDependencies:
-      jsdom: '>=10.0.0'
-    resolution:
-      integrity: sha1-a9KZwTsMRiay2iwDk81DhdYGrLk=
   /jsdom/16.4.0:
     dependencies:
       abab: 2.0.5
@@ -8020,10 +8007,6 @@ packages:
       node: '>=8'
     resolution:
       integrity: sha512-t7hw9pI+WvuwNJXwk5zVHpyhIqzg2qTlklJOf0mVxGSbe3Fp2VieZcduNYjaLDoy6p9uGpQEGWG87WpMKlNq8g==
-  /lodash-es/4.17.20:
-    dev: false
-    resolution:
-      integrity: sha512-JD1COMZsq8maT6mnuz1UMV0jvYD0E0aUsSOdrr1/nAG3dhqQXwRRgeW0cSqH1U43INKcqxaiVIQNOUDld7gRDA==
   /lodash._reinterpolate/3.0.0:
     dev: true
     resolution:
@@ -11190,6 +11173,30 @@ packages:
       node: '>=0.10.0'
     resolution:
       integrity: sha1-42RqLqTokTEr9+rObPsFOAvAHCE=
+  /ts-jest/26.5.0_jest@26.6.3+typescript@4.1.3:
+    dependencies:
+      '@types/jest': 26.0.20
+      bs-logger: 0.2.6
+      buffer-from: 1.1.1
+      fast-json-stable-stringify: 2.1.0
+      jest: 26.6.3
+      jest-util: 26.6.2
+      json5: 2.1.3
+      lodash: 4.17.20
+      make-error: 1.3.6
+      mkdirp: 1.0.4
+      semver: 7.3.4
+      typescript: 4.1.3
+      yargs-parser: 20.2.4
+    dev: true
+    engines:
+      node: '>= 10'
+    hasBin: true
+    peerDependencies:
+      jest: '>=26 <27'
+      typescript: '>=3.8 <5.0'
+    resolution:
+      integrity: sha512-Ya4IQgvIFNa2Mgq52KaO8yBw2W8tWp61Ecl66VjF0f5JaV8u50nGoptHVILOPGoI7SDnShmEqnYQEmyHdQ+56g==
   /ts-node/9.1.1_typescript@4.1.3:
     dependencies:
       arg: 4.1.3

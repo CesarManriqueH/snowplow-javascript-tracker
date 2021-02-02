@@ -120,7 +120,7 @@
     },
     {
       "name": "@types/jest",
-      "allowedCategories": [ "trackers" ]
+      "allowedCategories": [ "libraries", "trackers" ]
     },
     {
       "name": "@types/jsdom-global",
@@ -132,6 +132,10 @@
     },
     {
       "name": "@types/lodash",
+      "allowedCategories": [ "libraries", "plugins", "trackers" ]
+    },
+    {
+      "name": "@types/lodash-es",
       "allowedCategories": [ "libraries", "plugins", "trackers" ]
     },
     {
@@ -220,7 +224,7 @@
     },
     {
       "name": "jest",
-      "allowedCategories": [ "trackers" ]
+      "allowedCategories": [ "libraries", "trackers" ]
     },
     {
       "name": "jsdom",
@@ -240,7 +244,7 @@
     },
     {
       "name": "lodash-es",
-      "allowedCategories": [ "libraries" ]
+      "allowedCategories": [ "libraries", "plugins", "trackers" ]
     },
     {
       "name": "moment-timezone",
@@ -277,6 +281,10 @@
     {
       "name": "sha1",
       "allowedCategories": [ "trackers" ]
+    },
+    {
+      "name": "ts-jest",
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "ts-node",

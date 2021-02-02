@@ -162,7 +162,7 @@ export function fromQuerystring(field: string, url: string) {
   return decodeURIComponent(match[1].replace(/\+/g, ' '));
 }
 
-export type DynamicContexts = (SelfDescribingJson | ((...params: string[]) => SelfDescribingJson))[];
+export type DynamicContexts = (SelfDescribingJson | ((...params: string[]) => SelfDescribingJson | null))[];
 
 /*
  * Find dynamic context generating functions and merge their results into the static contexts
