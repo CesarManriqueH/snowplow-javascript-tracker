@@ -138,7 +138,7 @@ exports.config = {
     [
       'static-server',
       {
-        folders: [{ mount: '/', path: './tests/pages' }],
+        folders: [{ mount: '/', path: './test/pages' }],
         port: 8080,
       },
     ],

@@ -50,7 +50,7 @@ export const start = () => {
       OpenStdin: false,
       StdinOnce: false,
       Hostconfig: {
-        Binds: [`${process.cwd()}/tests/micro-config:/config`],
+        Binds: [`${process.cwd()}/test/micro-config:/config`],
         PortBindings: {
           '9090/tcp': [
             {

@@ -32,7 +32,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import { fixupUrl } from '../ts/proxies';
+import { fixupUrl } from '../src/proxies';
 
 describe('Proxies', () => {
   beforeAll(() => {

@@ -32,7 +32,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import { decorateQuerystring, resolveDynamicContexts, getCssClasses } from '../ts/helpers';
+import { decorateQuerystring, resolveDynamicContexts, getCssClasses } from '../src/helpers';
 
 describe('decorateQuerystring', () => {
   it('Decorate a URL with no querystring or fragment', () => {

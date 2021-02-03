@@ -6,9 +6,9 @@
   "scripts": {
     "build": "rollup -c --silent",
     "dev": "rollup -c -w",
-    "test": "jest tests/unit/*.spec.js",
-    "test:e2e:sauce": "gulp buildForIntegrationTest && wdio tests/wdio.sauce.conf.js",
-    "test:e2e:local": "gulp buildForIntegrationTest && wdio tests/wdio.local.conf.js"
+    "test": "jest test/unit/*.spec.js",
+    "test:e2e:sauce": "gulp buildForIntegrationTest && wdio test/wdio.sauce.conf.js",
+    "test:e2e:local": "gulp buildForIntegrationTest && wdio test/wdio.local.conf.js"
   },
   "dependencies": {
     "lodash": "^4.17.20",

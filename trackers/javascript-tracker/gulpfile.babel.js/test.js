@@ -4,24 +4,24 @@ import Docker from 'dockerode';
 
 // export const buildTestDetectors = async function () {
 //   const detectors = await rollup({
-//     input: 'tests/scripts/detectors.js',
+//     input: 'test/scripts/detectors.js',
 //     plugins: core,
 //   });
 //   return await detectors.write({
 //     name: 'detectors',
-//     file: 'tests/pages/detectors.js',
+//     file: 'test/pages/detectors.js',
 //     format: 'iife',
 //   });
 // };
 
 // export const buildTestHelpers = async function () {
 //   const helpers = await rollup({
-//     input: 'tests/scripts/helpers.js',
+//     input: 'test/scripts/helpers.js',
 //     plugins: core,
 //   });
 //   return await helpers.write({
 //     name: 'helpers',
-//     file: 'tests/pages/helpers.js',
+//     file: 'test/pages/helpers.js',
 //     format: 'iife',
 //   });
 // };
@@ -33,7 +33,7 @@ export const buildTestSnowplow = async function () {
   });
 
   return await snowplow.write({
-    file: 'tests/pages/snowplow.js',
+    file: 'test/pages/snowplow.js',
     format: 'iife',
   });
 };
