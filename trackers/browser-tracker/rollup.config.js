@@ -27,13 +27,7 @@ export default [
   },
   {
     input: 'ts/snowplow.ts',
-    plugins: [
-      ...plugins,
-      compiler({
-        compilation_level: 'WHITESPACE_ONLY',
-      }),
-      banner(bannerContent),
-    ],
+    plugins: [...plugins, banner(bannerContent)],
     treeshake: { moduleSideEffects: ['jstimezonedetect'] },
     output: [{ file: pkg.main, format: 'umd', name: 'snowplow' }],
   },

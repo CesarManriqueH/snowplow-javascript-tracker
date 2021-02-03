@@ -1,11 +1,9 @@
 {
   "compilerOptions": {
+    /* Module and Target are calculated by @wessberg/rollup-plugin-ts
     /* Basic Options */
-    "module": "commonjs" /* Ignored by rollup but used by ts-jest for tests */,
     "declaration": true /* Generates corresponding '.d.ts' file. */,
     "resolveJsonModule": true,
-
-    "target": "es2015" /* Compiled for browsers by Closure Compiler */,
 
     /* Strict Type-Checking Options */
     "strict": true /* Enable all strict type-checking options. */,

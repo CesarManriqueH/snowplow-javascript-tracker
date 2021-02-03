@@ -32,7 +32,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import { forEach } from 'lodash';
+import forEach from 'lodash/forEach';
 import { addEventListener } from './helpers';
 
 declare global {
