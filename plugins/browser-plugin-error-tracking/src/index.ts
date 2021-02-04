@@ -69,7 +69,7 @@ const ErrorTrackingPlugin = (): BrowserApiPlugin<ErrorMethods> => {
     commonContexts: Array<SelfDescribingJson>,
     contextsAdder: (error: ErrorEvent) => Array<SelfDescribingJson>
   ) => {
-    let contexts = commonContexts;
+    let contexts = commonContexts || [];
     if (isFunction(contextsAdder)) {
       contexts = contexts.concat(contextsAdder(errorEvent));
     }
