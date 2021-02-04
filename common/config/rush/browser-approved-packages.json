@@ -120,7 +120,7 @@
     },
     {
       "name": "@types/jest",
-      "allowedCategories": [ "libraries", "trackers" ]
+      "allowedCategories": [ "libraries", "plugins", "trackers" ]
     },
     {
       "name": "@types/jsdom-global",
@@ -224,7 +224,11 @@
     },
     {
       "name": "jest",
-      "allowedCategories": [ "libraries", "trackers" ]
+      "allowedCategories": [ "libraries", "plugins", "trackers" ]
+    },
+    {
+      "name": "jest-standard-reporter",
+      "allowedCategories": [ "libraries", "plugins", "trackers" ]
     },
     {
       "name": "jsdom",
@@ -284,7 +288,7 @@
     },
     {
       "name": "ts-jest",
-      "allowedCategories": [ "libraries" ]
+      "allowedCategories": [ "libraries", "plugins", "trackers" ]
     },
     {
       "name": "ts-node",

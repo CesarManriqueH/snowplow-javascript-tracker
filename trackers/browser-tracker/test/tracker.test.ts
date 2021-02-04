@@ -1,5 +1,6 @@
+import { SharedState } from '@snowplow/browser-core';
 import F from 'lodash/fp';
-import { Tracker } from '../../src/js/tracker';
+import { Tracker } from '../src/tracker';
 
 jest.useFakeTimers('modern');
 
@@ -7,22 +8,13 @@ const getPPEvents = F.compose(F.filter(F.compose(F.eq('pp'), F.get('evt.e'))), F
 
 const getUEEvents = F.compose(F.filter(F.compose(F.eq('ue'), F.get('evt.e'))), F.first);
 
-const extractSchemas = F.map(F.compose(F.get('data'), (cx) => JSON.parse(cx), F.get('evt.co')));
+const extractSchemas = F.map(F.compose(F.get('data'), (cx: string) => JSON.parse(cx), F.get('evt.co')));
 
-const extractPageId = F.compose(F.get('data[0].data.id'), (cx) => JSON.parse(cx), F.get('evt.co'));
+const extractPageId = F.compose(F.get('data[0].data.id'), (cx: string) => JSON.parse(cx), F.get('evt.co'));
 
 describe('Activity tracker behaviour', () => {
-  let oldDocument;
-
   beforeAll(() => {
-    oldDocument = document;
-    global.document = Object.create(document);
-    document.domain = '';
-  });
-
-  afterAll(() => {
-    global.document = oldDocument;
-    clear();
+    document.domain = 'http://localhost';
   });
 
   beforeEach(() => {
@@ -31,8 +23,8 @@ describe('Activity tracker behaviour', () => {
 
   it('supports different timings for ping vs callback activity tracking', () => {
     let callbacks = 0;
-    const outQueues = [];
-    const t = new Tracker('', '', '', { outQueues }, { stateStorageStrategy: 'cookies' });
+    const state = new SharedState();
+    const t = Tracker('', '', '', state, { stateStorageStrategy: 'cookies' });
     t.enableActivityTracking(10, 10);
     t.enableActivityTrackingCallback(5, 5, () => {
       callbacks++;
@@ -56,25 +48,19 @@ describe('Activity tracker behaviour', () => {
     // window for page ping ticks
 
     expect(callbacks).toBe(4);
-    expect(F.size(getPPEvents(outQueues))).toBe(2);
+    expect(F.size(getPPEvents(state.outQueues))).toBe(2);
   });
 
   it('maintains current static context behaviour', () => {
-    const outQueues = [];
-    const t = new Tracker(
-      '',
-      '',
-      '',
-      { outQueues },
-      {
-        resetActivityTrackingOnPageView: false,
-        stateStorageStrategy: 'cookies',
-        encodeBase64: false,
-        contexts: {
-          webPage: true,
-        },
-      }
-    );
+    const state = new SharedState();
+    const t = Tracker('', '', '', state, {
+      resetActivityTrackingOnPageView: false,
+      stateStorageStrategy: 'cookies',
+      encodeBase64: false,
+      contexts: {
+        webPage: true,
+      },
+    });
     t.enableActivityTracking(0, 2);
     t.trackPageView(null, [
       {
@@ -113,31 +99,25 @@ describe('Activity tracker behaviour', () => {
     const findWithStaticValue = F.filter(F.get('data.staticValue'));
     const extractContextsWithStaticValue = F.compose(findWithStaticValue, F.flatten, extractSchemas, getPPEvents);
 
-    const countWithStaticValueEq = (value) =>
+    const countWithStaticValueEq = (value: number) =>
       F.compose(F.size, F.filter(F.compose(F.eq(value), F.get('data.staticValue'))), extractContextsWithStaticValue);
 
     // we expect there to be two page pings with static contexts attached
     // they should both have the time from page one.
-    expect(countWithStaticValueEq(pageOneTime)(outQueues)).toBe(2);
-    expect(countWithStaticValueEq(pageTwoTime)(outQueues)).toBe(0);
+    expect(countWithStaticValueEq(pageOneTime)(state.outQueues)).toBe(2);
+    expect(countWithStaticValueEq(pageTwoTime)(state.outQueues)).toBe(0);
   });
 
   it('does not reset activity tracking on pageview when resetActivityTrackingOnPageView: false,', () => {
-    const outQueues = [];
-    const t = new Tracker(
-      '',
-      '',
-      '',
-      { outQueues },
-      {
-        resetActivityTrackingOnPageView: false,
-        stateStorageStrategy: 'cookies',
-        encodeBase64: false,
-        contexts: {
-          webPage: true,
-        },
-      }
-    );
+    const state = new SharedState();
+    const t = Tracker('', '', '', state, {
+      resetActivityTrackingOnPageView: false,
+      stateStorageStrategy: 'cookies',
+      encodeBase64: false,
+      contexts: {
+        webPage: true,
+      },
+    });
     t.enableActivityTracking(0, 30);
     t.trackPageView();
 
@@ -155,25 +135,19 @@ describe('Activity tracker behaviour', () => {
     jest.advanceTimersByTime(25000);
 
     // Activity tracking is currently not reset per page view so we get an extra page ping on page two.
-    const pps = getPPEvents(outQueues);
+    const pps = getPPEvents(state.outQueues);
     expect(F.size(pps)).toBe(2);
   });
 
   it('does reset activity tracking on pageview by default', () => {
-    const outQueues = [];
-    const t = new Tracker(
-      '',
-      '',
-      '',
-      { outQueues },
-      {
-        stateStorageStrategy: 'cookies',
-        encodeBase64: false,
-        contexts: {
-          webPage: true,
-        },
-      }
-    );
+    const state = new SharedState();
+    const t = Tracker('', '', '', state, {
+      stateStorageStrategy: 'cookies',
+      encodeBase64: false,
+      contexts: {
+        webPage: true,
+      },
+    });
     t.enableActivityTracking(0, 30);
     t.trackPageView();
 
@@ -200,48 +174,36 @@ describe('Activity tracker behaviour', () => {
     // Activity began tracking on the first page but moved on before 30 seconds.
     // Activity tracking should still not have fire despite being on site 30 seconds, as user has moved page.
 
-    const pps = getPPEvents(outQueues);
+    const pps = getPPEvents(state.outQueues);
 
     expect(F.size(pps)).toBe(1);
   });
 
   it('allows running callback after sending tracking events', () => {
-    const outQueues = [];
-    const t = new Tracker(
-      '',
-      '',
-      '',
-      { outQueues },
-      {
-        stateStorageStrategy: 'cookies',
-        encodeBase64: false,
-        contexts: {
-          webPage: true,
-        },
-      }
-    );
+    const state = new SharedState();
+    const t = Tracker('', '', '', state, {
+      stateStorageStrategy: 'cookies',
+      encodeBase64: false,
+      contexts: {
+        webPage: true,
+      },
+    });
 
     let marker = false;
-    t.trackPageView(null, null, null, null, (ev) => (marker = true));
+    t.trackPageView(null, null, null, null, () => (marker = true));
 
     expect(marker).toBe(true);
   });
 
   it('fires initial delayed activity tracking on first pageview and second pageview', () => {
-    const outQueues = [];
-    const t = new Tracker(
-      '',
-      '',
-      '',
-      { outQueues },
-      {
-        stateStorageStrategy: 'cookies',
-        encodeBase64: false,
-        contexts: {
-          webPage: true,
-        },
-      }
-    );
+    const state = new SharedState();
+    const t = Tracker('', '', '', state, {
+      stateStorageStrategy: 'cookies',
+      encodeBase64: false,
+      contexts: {
+        webPage: true,
+      },
+    });
     t.enableActivityTracking(10, 5);
 
     t.trackPageView();
@@ -254,7 +216,7 @@ describe('Activity tracker behaviour', () => {
 
     jest.advanceTimersByTime(5000);
 
-    const initial_pps = getPPEvents(outQueues);
+    const initial_pps = getPPEvents(state.outQueues);
     expect(F.size(initial_pps)).toBe(0);
 
     jest.advanceTimersByTime(5000); // PP = 1
@@ -279,7 +241,7 @@ describe('Activity tracker behaviour', () => {
     jest.advanceTimersByTime(5000);
 
     // Should still only have 3 page pings from first page
-    const first_page_only_pps = getPPEvents(outQueues);
+    const first_page_only_pps = getPPEvents(state.outQueues);
     expect(F.size(first_page_only_pps)).toBe(3);
 
     jest.advanceTimersByTime(5000); // PP = 4
@@ -291,7 +253,7 @@ describe('Activity tracker behaviour', () => {
     // Activity began tracking on the first page and tracked two page pings in 16 seconds.
     // Activity tracking only fires one further event over next 11 seconds as a page view event occurs, resetting timer back to 10 seconds.
 
-    const pps = getPPEvents(outQueues);
+    const pps = getPPEvents(state.outQueues);
 
     expect(F.size(pps)).toBe(5);
 
@@ -303,45 +265,33 @@ describe('Activity tracker behaviour', () => {
   });
 
   it('does not log skipped browser features', () => {
-    const outQueues = [];
-    const t = new Tracker(
-      '',
-      '',
-      '',
-      { outQueues },
-      {
-        stateStorageStrategy: 'cookies',
-        encodeBase64: false,
-        contexts: {
-          webPage: true,
-        },
-        skippedBrowserFeatures: ['cd'],
-      }
-    );
+    const state = new SharedState();
+    const t = Tracker('', '', '', state, {
+      stateStorageStrategy: 'cookies',
+      encodeBase64: false,
+      contexts: {
+        webPage: true,
+      },
+      skippedBrowserFeatures: ['cd'],
+    });
     t.enableActivityTracking(10, 5);
 
     t.trackPageView();
     t.updatePageActivity();
     jest.advanceTimersByTime(15000);
 
-    const pps = getPPEvents(outQueues);
+    const pps = getPPEvents(state.outQueues);
 
     const pph = F.head(pps);
-    expect(F.hasIn(pph, 'evt.e.cd')).toBe(false);
+    expect(F.hasIn(pph as any, 'evt.e.cd')).toBe(false);
   });
 
   it('attaches enhanced ecommerce contexts to enhanced ecommerce events', () => {
-    const outQueues = [];
-    const t = new Tracker(
-      '',
-      '',
-      '',
-      { outQueues },
-      {
-        stateStorageStrategy: 'cookies',
-        encodeBase64: false,
-      }
-    );
+    const state = new SharedState();
+    const t = Tracker('', '', '', state, {
+      stateStorageStrategy: 'cookies',
+      encodeBase64: false,
+    });
 
     t.addEnhancedEcommerceProductContext('1234-5678', 'T-Shirt');
     t.addEnhancedEcommerceImpressionContext('1234-5678', 'T-Shirt');
@@ -352,10 +302,10 @@ describe('Activity tracker behaviour', () => {
     const findWithStaticValue = F.filter(F.get('data.id'));
     const extractContextsWithStaticValue = F.compose(findWithStaticValue, F.flatten, extractSchemas, getUEEvents);
 
-    const countWithStaticValueEq = (value) =>
+    const countWithStaticValueEq = (value: string) =>
       F.compose(F.size, F.filter(F.compose(F.eq(value), F.get('data.id'))), extractContextsWithStaticValue);
 
     // we expect there to be four contexts added to the event
-    expect(countWithStaticValueEq('1234-5678')(outQueues)).toBe(4);
+    expect(countWithStaticValueEq('1234-5678')(state.outQueues)).toBe(4);
   });
 });

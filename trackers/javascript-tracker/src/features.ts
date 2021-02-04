@@ -20,6 +20,7 @@ import {
 import { plugins, detectors } from '../tracker.config';
 
 export function Plugins(argmap: any) {
+  if (!argmap || !argmap.contexts) return {};
   const {
       performanceTiming,
       gaCookies,
@@ -34,7 +35,7 @@ export function Plugins(argmap: any) {
       optimizelyXSummary,
       parrable,
       clientHints,
-    } = argmap.contexts || {},
+    } = argmap.contexts,
     gdprPlugin = plugins.gdpr ? GdprPlugin() : null,
     geolocationPlugin = plugins.geolocation ? GeolocationPlugin(geolocation) : null,
     contextPlugins = [],
@@ -114,7 +115,9 @@ export function Plugins(argmap: any) {
 }
 
 export function Detectors(argmap: any) {
-  const { cookie, screen, window, document, timezone, browserFeatures } = argmap.detectors || {},
+  if (!argmap || !argmap.detectors) return {};
+
+  const { cookie, screen, window, document, timezone, browserFeatures } = argmap.detectors,
     selectedDetectors: any = {};
 
   if (detectors.cookie && (cookie ?? true)) {

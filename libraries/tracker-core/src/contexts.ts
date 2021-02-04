@@ -203,7 +203,7 @@ export interface PluginContexts {
   /**
    * Returns list of contexts from all active plugins
    */
-  addPluginContexts: (additionalContexts?: SelfDescribingJson[]) => SelfDescribingJson[];
+  addPluginContexts: (additionalContexts?: SelfDescribingJson[] | null) => SelfDescribingJson[];
 }
 
 export function pluginContexts(plugins?: Array<ContextPlugin>): PluginContexts {
@@ -214,7 +214,7 @@ export function pluginContexts(plugins?: Array<ContextPlugin>): PluginContexts {
    * @return userContexts combined with commonContexts
    */
   return {
-    addPluginContexts: (additionalContexts?: SelfDescribingJson[]): SelfDescribingJson[] => {
+    addPluginContexts: (additionalContexts?: SelfDescribingJson[] | null): SelfDescribingJson[] => {
       const combinedContexts: SelfDescribingJson[] = additionalContexts ?? [];
 
       plugins?.forEach((plugin) => {

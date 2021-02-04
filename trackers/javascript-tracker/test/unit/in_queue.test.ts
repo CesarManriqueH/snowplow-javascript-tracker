@@ -32,26 +32,24 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import { InQueueManager } from '../../src/js/in_queue';
+import { InQueueManager } from '../../src/in_queue';
 
-import * as Tracker from '../../src/js/tracker';
+import { newTracker, getTracker, allTrackers, TrackerApi } from '@snowplow/browser-tracker';
 
-jest.mock('../../src/js/tracker');
+jest.mock('@snowplow/browser-tracker');
+const mockNewTracker = newTracker as jest.Mock<TrackerApi>;
+const mockGetTracker = getTracker as jest.Mock<TrackerApi>;
+const mockAllTrackers = allTrackers as jest.Mock<Record<string, TrackerApi>>;
 
 describe('InQueueManager', () => {
   let output = 0;
-  Tracker.Tracker.mockImplementation((functionName, namespace, version, mutSnowplowState, argmap) => {
-    var configCollectorUrl,
-      attribute = 10;
-
+  const newTracker = (): any => {
+    let attribute = 10;
     return {
-      setCollectorUrl: function (rawUrl) {
-        configCollectorUrl = 'http://' + rawUrl + '/i';
-      },
-      increaseAttribute: function (n) {
+      increaseAttribute: function (n: number) {
         attribute += n;
       },
-      setAttribute: function (p) {
+      setAttribute: function (p: number) {
         attribute = p;
       },
       setOutputToAttribute: function () {
@@ -61,14 +59,22 @@ describe('InQueueManager', () => {
         output += attribute;
       },
     };
+  };
+  const mockTracker: Record<string, unknown> = {};
+
+  mockNewTracker.mockImplementation((name: string): any => {
+    mockTracker[name] = newTracker();
+    return mockTracker[name];
   });
+  mockGetTracker.mockImplementation((name: string): any => mockTracker[name]);
+  mockAllTrackers.mockImplementation((): any => mockTracker);
 
   const asyncQueueOps = [
     ['newTracker', 'firstTracker', 'firstEndpoint'],
     ['increaseAttribute', 5],
     ['setOutputToAttribute'],
   ];
-  const asyncQueue = new InQueueManager('snowplow', asyncQueueOps);
+  const asyncQueue = InQueueManager('snowplow', asyncQueueOps);
 
   it('Make a proxy, Function originally stored in asyncQueue is executed when asyncQueue becomes an AsyncQueueProxy', () => {
     expect(output).toEqual(15);

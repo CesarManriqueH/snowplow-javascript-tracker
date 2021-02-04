@@ -45,7 +45,7 @@ import {
 } from '@snowplow/browser-core';
 import { Payload } from '@snowplow/tracker-core';
 
-interface OutQueue {
+export interface OutQueue {
   enqueueRequest: (request: Payload, url: string) => void;
   executeQueue: () => void;
   setUseLocalStorage: (localStorage: boolean) => void;
@@ -354,7 +354,9 @@ export function OutQueueManager(
           });
 
           if (beaconPreflight) {
-            const blob = new Blob([encloseInPayloadDataEnvelope(attachStmToEvent(eventBatch))], { type: 'application/json' });
+            const blob = new Blob([encloseInPayloadDataEnvelope(attachStmToEvent(eventBatch))], {
+              type: 'application/json',
+            });
             try {
               beaconStatus = navigator.sendBeacon(url, blob);
             } catch (error) {

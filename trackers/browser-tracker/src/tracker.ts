@@ -307,11 +307,11 @@ export type TrackerApi = {
    * @param function afterTrack (optional) A callback function triggered after event is tracked
    */
   trackPageView: (
-    customTitle: string,
-    context: Array<SelfDescribingJson>,
-    contextCallback: () => Array<SelfDescribingJson>,
-    tstamp: Timestamp,
-    afterTrack: (payload: Payload) => void
+    customTitle?: string | null,
+    context?: Array<SelfDescribingJson> | null,
+    contextCallback?: (() => Array<SelfDescribingJson>) | null,
+    tstamp?: Timestamp | null,
+    afterTrack?: ((payload: Payload) => void) | null
   ) => void;
 
   /**
@@ -652,7 +652,11 @@ export type TrackerApi = {
    * @param array context Optional. Context relating to the event.
    * @param tstamp Opinal number or Timestamp object
    */
-  trackEnhancedEcommerceAction: (action: string, context: Array<SelfDescribingJson>, tstamp: Timestamp) => void;
+  trackEnhancedEcommerceAction: (
+    action?: string,
+    context?: Array<SelfDescribingJson> | null,
+    tstamp?: Timestamp | null
+  ) => void;
 
   /**
    * Adds a GA Enhanced Ecommerce Action Context
@@ -669,16 +673,16 @@ export type TrackerApi = {
    * @param string currency
    */
   addEnhancedEcommerceActionContext: (
-    id: string,
-    affiliation: string,
-    revenue: number,
-    tax: number,
-    shipping: number,
-    coupon: string,
-    list: string,
-    step: number,
-    option: string,
-    currency: string
+    id?: string,
+    affiliation?: string,
+    revenue?: number,
+    tax?: number,
+    shipping?: number,
+    coupon?: string,
+    list?: string,
+    step?: number,
+    option?: string,
+    currency?: string
   ) => void;
 
   /**
@@ -695,15 +699,15 @@ export type TrackerApi = {
    * @param string currency
    */
   addEnhancedEcommerceImpressionContext: (
-    id: string,
-    name: string,
-    list: string,
-    brand: string,
-    category: string,
-    variant: string,
-    position: number,
-    price: number,
-    currency: string
+    id?: string,
+    name?: string,
+    list?: string,
+    brand?: string,
+    category?: string,
+    variant?: string,
+    position?: number,
+    price?: number,
+    currency?: string
   ) => void;
 
   /**
@@ -722,17 +726,17 @@ export type TrackerApi = {
    * @param string currency
    */
   addEnhancedEcommerceProductContext: (
-    id: string,
-    name: string,
-    list: string,
-    brand: string,
-    category: string,
-    variant: string,
-    price: number,
-    quantity: number,
-    coupon: string,
-    position: number,
-    currency: string
+    id?: string,
+    name?: string,
+    list?: string,
+    brand?: string,
+    category?: string,
+    variant?: string,
+    price?: number,
+    quantity?: number,
+    coupon?: string,
+    position?: number,
+    currency?: string
   ) => void;
 
   /**
@@ -745,11 +749,11 @@ export type TrackerApi = {
    * @param string currency
    */
   addEnhancedEcommercePromoContext: (
-    id: string,
-    name: string,
-    creative: string,
-    position: string,
-    currency: string
+    id?: string,
+    name?: string,
+    creative?: string,
+    position?: string,
+    currency?: string
   ) => void;
 
   /**
@@ -906,7 +910,7 @@ export function Tracker(
     // Document title
     lastDocumentTitle = documentAlias.title,
     // Custom title
-    lastConfigTitle: string | undefined,
+    lastConfigTitle: string | null | undefined,
     // Maximum delay to wait for web bug image to be fetched (in milliseconds)
     configTrackerPause = argmap.hasOwnProperty('pageUnloadTimer') ? argmap.pageUnloadTimer : 500,
     // Controls whether activity tracking page ping event timers are reset on page view events
@@ -1030,7 +1034,7 @@ export function Tracker(
   if (detectors.screen) detectors.screen(core);
   if (detectors.document) detectors.document(core);
   if (detectors.cookie) detectors.cookie(core);
-  
+
   /**
    * Recalculate the domain, URL, and referrer
    */
@@ -1633,8 +1637,8 @@ export function Tracker(
    * @param contextCallback Function returning an array of contexts
    */
   function finalizeContexts(
-    staticContexts?: Array<SelfDescribingJson>,
-    contextCallback?: () => Array<SelfDescribingJson>
+    staticContexts?: Array<SelfDescribingJson> | null,
+    contextCallback?: (() => Array<SelfDescribingJson>) | null
   ) {
     return (staticContexts || []).concat(contextCallback ? contextCallback() : []);
   }
@@ -1649,11 +1653,11 @@ export function Tracker(
    * @param function afterTrack (optional) A callback function triggered after event is tracked
    */
   function logPageView(
-    customTitle?: string,
-    context?: Array<SelfDescribingJson>,
-    contextCallback?: () => Array<SelfDescribingJson>,
-    tstamp?: Timestamp,
-    afterTrack?: ((Payload: Payload) => void) | undefined
+    customTitle?: string | null,
+    context?: Array<SelfDescribingJson> | null,
+    contextCallback?: (() => Array<SelfDescribingJson>) | null,
+    tstamp?: Timestamp | null,
+    afterTrack?: ((payload: Payload) => void) | null
   ) {
     refreshUrl();
     if (pageViewSent) {
@@ -2198,11 +2202,11 @@ export function Tracker(
    * @param function afterTrack (optional) A callback function triggered after event is tracked
    */
   apiMethods.trackPageView = function (
-    customTitle: string,
-    context: Array<SelfDescribingJson>,
-    contextCallback: () => Array<SelfDescribingJson>,
-    tstamp: Timestamp,
-    afterTrack: (payload: Payload) => void
+    customTitle?: string | null,
+    context?: Array<SelfDescribingJson> | null,
+    contextCallback?: (() => Array<SelfDescribingJson>) | null,
+    tstamp?: Timestamp | null,
+    afterTrack?: ((payload: Payload) => void) | null
   ) {
     logPageView(customTitle, context, contextCallback, tstamp, afterTrack);
   };
@@ -2244,7 +2248,7 @@ export function Tracker(
    * @param function afterTrack (optional) A callback function triggered after event is tracked
    */
   apiMethods.trackSelfDescribingEvent = function (
-    eventJson: Record<string, unknown>,
+    eventJson: SelfDescribingJson,
     context: Array<SelfDescribingJson>,
     tstamp: Timestamp,
     afterTrack: (payload: Payload) => void
@@ -2675,9 +2679,9 @@ export function Tracker(
    * @param tstamp Opinal number or Timestamp object
    */
   apiMethods.trackEnhancedEcommerceAction = function (
-    action: string,
-    context: Array<SelfDescribingJson>,
-    tstamp: Timestamp
+    action?: string,
+    context?: Array<SelfDescribingJson> | null,
+    tstamp?: Timestamp | null
   ) {
     var combinedEnhancedEcommerceContexts = enhancedEcommerceContexts.concat(context || []);
     enhancedEcommerceContexts.length = 0;
@@ -2709,16 +2713,16 @@ export function Tracker(
    * @param string currency
    */
   apiMethods.addEnhancedEcommerceActionContext = function (
-    id: string,
-    affiliation: string,
-    revenue: string,
-    tax: number,
-    shipping: number,
-    coupon: string,
-    list: string,
-    step: number,
-    option: string,
-    currency: string
+    id?: string,
+    affiliation?: string,
+    revenue?: string,
+    tax?: number,
+    shipping?: number,
+    coupon?: string,
+    list?: string,
+    step?: number,
+    option?: string,
+    currency?: string
   ) {
     enhancedEcommerceContexts.push({
       schema: 'iglu:com.google.analytics.enhanced-ecommerce/actionFieldObject/jsonschema/1-0-0',
@@ -2751,15 +2755,15 @@ export function Tracker(
    * @param string currency
    */
   apiMethods.addEnhancedEcommerceImpressionContext = function (
-    id: string,
-    name: string,
-    list: string,
-    brand: string,
-    category: string,
-    variant: string,
-    position: number,
-    price: string,
-    currency: string
+    id?: string,
+    name?: string,
+    list?: string,
+    brand?: string,
+    category?: string,
+    variant?: string,
+    position?: number,
+    price?: string,
+    currency?: string
   ) {
     enhancedEcommerceContexts.push({
       schema: 'iglu:com.google.analytics.enhanced-ecommerce/impressionFieldObject/jsonschema/1-0-0',
@@ -2793,17 +2797,17 @@ export function Tracker(
    * @param string currency
    */
   apiMethods.addEnhancedEcommerceProductContext = function (
-    id: string,
-    name: string,
-    list: string,
-    brand: string,
-    category: string,
-    variant: string,
-    price: number,
-    quantity: number,
-    coupon: string,
-    position: number,
-    currency: string
+    id?: string,
+    name?: string,
+    list?: string,
+    brand?: string,
+    category?: string,
+    variant?: string,
+    price?: number,
+    quantity?: number,
+    coupon?: string,
+    position?: number,
+    currency?: string
   ) {
     enhancedEcommerceContexts.push({
       schema: 'iglu:com.google.analytics.enhanced-ecommerce/productFieldObject/jsonschema/1-0-0',
@@ -2833,11 +2837,11 @@ export function Tracker(
    * @param string currency
    */
   apiMethods.addEnhancedEcommercePromoContext = function (
-    id: string,
-    name: string,
-    creative: string,
-    position: string,
-    currency: string
+    id?: string,
+    name?: string,
+    creative?: string,
+    position?: string,
+    currency?: string
   ) {
     enhancedEcommerceContexts.push({
       schema: 'iglu:com.google.analytics.enhanced-ecommerce/promoFieldObject/jsonschema/1-0-0',

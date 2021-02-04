@@ -6,7 +6,7 @@
   "scripts": {
     "build": "rollup -c --silent",
     "dev": "rollup -c -w",
-    "test": "jest test/unit/*.spec.js",
+    "test": "jest test/unit/*.test.ts",
     "test:e2e:sauce": "gulp buildForIntegrationTest && wdio test/wdio.sauce.conf.js",
     "test:e2e:local": "gulp buildForIntegrationTest && wdio test/wdio.local.conf.js"
   },
@@ -34,7 +34,7 @@
     "@rollup/plugin-commonjs": "^17.0.0",
     "@rollup/plugin-json": "^4.1.0",
     "@rollup/plugin-node-resolve": "^11.0.0",
-    "@types/jest": "^26.0.15",
+    "@types/jest": "^26.0.20",
     "@types/lodash": "^4.14.168",
     "@wdio/cli": "^6.10.5",
     "@wdio/jasmine-framework": "^6.10.4",
@@ -56,9 +56,10 @@
     "rollup-plugin-filesize": "^9.0.2",
     "rollup-plugin-sizes": "^1.0.3",
     "saucelabs": "^4.6.0",
-    "ts-node": "^9.0.0",
+    "ts-jest": "^26.5.0",
     "typescript": "^4.1.2",
-    "wdio-chromedriver-service": "^6.0.4"
+    "wdio-chromedriver-service": "^6.0.4",
+    "jest-standard-reporter": "~2.0.0"
   },
   "contributors": [
     "Alex Dean",
