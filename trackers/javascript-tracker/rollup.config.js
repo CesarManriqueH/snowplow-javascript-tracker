@@ -30,7 +30,7 @@ const plugins = [
 
 export default [
   {
-    input: 'ts/index.ts',
+    input: './src/index.ts',
     plugins: plugins,
     treeshake: { moduleSideEffects: ['jstimezonedetect'] },
     output: [{ file: pkg.main, format: 'iife' }],
