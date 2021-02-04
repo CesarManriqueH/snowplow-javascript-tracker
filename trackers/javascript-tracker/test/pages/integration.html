@@ -78,6 +78,9 @@
         platform: 'web',
         eventMethod: eventMethod,
         encodeBase64: false,
+        contexts: {
+          webPage: false,
+        },
       });
 
       window.snowplow(function () {

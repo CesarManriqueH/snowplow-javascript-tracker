@@ -68,6 +68,7 @@ import {
   SelfDescribingJson,
   Timestamp,
   trackerCore,
+  ContextPlugin,
 } from '@snowplow/tracker-core';
 
 type ActivityConfig = {
@@ -866,11 +867,15 @@ export function Tracker(
 
   const getAnonymousTracking = (config: AnonymousTrackingOptions) => !!config.anonymousTracking;
 
-  const contextPlugins = (argmap.contextPlugins || []).concat(getWebPagePlugin());
+  let contextPlugins: Array<ContextPlugin> = argmap.contextPlugins || [];
+  let webPageContext = argmap?.contexts?.webPage ?? true;
+  if (webPageContext) {
+    contextPlugins = contextPlugins.concat(getWebPagePlugin());
+  }
 
   var // Tracker core
     core = trackerCore(
-      true,
+      argmap.hasOwnProperty('encodeBase64') ? argmap.encodeBase64 : true,
       function (payloadBuilder) {
         addBrowserData(payloadBuilder);
         sendRequest(payloadBuilder, configTrackerPause);
@@ -1019,9 +1024,6 @@ export function Tracker(
   if (argmap.hasOwnProperty('discoverRootDomain') && argmap.discoverRootDomain) {
     configCookieDomain = findRootDomain(configCookieSameSite, configCookieSecure);
   }
-
-  // Enable base 64 encoding for self-describing events and custom contexts
-  core.setBase64Encoding(argmap.hasOwnProperty('encodeBase64') ? argmap.encodeBase64 : true);
 
   // Set up unchanging name-value pairs
   core.setTrackerVersion(version);

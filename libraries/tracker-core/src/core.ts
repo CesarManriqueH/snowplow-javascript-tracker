@@ -694,7 +694,7 @@ export interface Core {
  * @return Tracker core
  */
 export function trackerCore(
-  base64: boolean,
+  base64?: boolean,
   callback?: (PayloadData: PayloadBuilder) => void,
   plugins?: Array<ContextPlugin>
 ): Core {
@@ -705,9 +705,7 @@ export function trackerCore(
   let payloadPairs: Payload = {};
 
   // base 64 encoding should default to true
-  if (typeof base64 === 'undefined') {
-    base64 = true;
-  }
+  let encodeBase64 = base64 ?? true;
 
   /**
    * Returns a copy of a JSON with undefined and null properties removed
@@ -823,7 +821,7 @@ export function trackerCore(
     tstamp?: Timestamp | null,
     afterTrack?: ((Payload: Payload) => void) | null
   ): PayloadBuilder => {
-    const sb = payloadBuilder(base64);
+    const sb = payloadBuilder(encodeBase64);
     const ueJson = {
       schema: 'iglu:com.snowplowanalytics.snowplow/unstruct_event/jsonschema/1-0-0',
       data: properties,
@@ -849,7 +847,7 @@ export function trackerCore(
     addPayloadPair,
 
     setBase64Encoding(encode: boolean): void {
-      base64 = encode;
+      encodeBase64 = encode;
     },
 
     addPayloadDict(dict: Payload): void {
@@ -922,7 +920,7 @@ export function trackerCore(
       tstamp?: Timestamp | null,
       afterTrack?: ((Payload: Payload) => void) | null
     ): PayloadBuilder {
-      const sb = payloadBuilder(base64);
+      const sb = payloadBuilder(encodeBase64);
       sb.add('e', 'pv'); // 'pv' for Page View
       sb.add('url', pageUrl);
       sb.add('page', pageTitle);
@@ -943,7 +941,7 @@ export function trackerCore(
       tstamp?: Timestamp | null,
       afterTrack?: ((Payload: Payload) => void) | null
     ): PayloadBuilder {
-      const sb = payloadBuilder(base64);
+      const sb = payloadBuilder(encodeBase64);
       sb.add('e', 'pp'); // 'pp' for Page Ping
       sb.add('url', pageUrl);
       sb.add('page', pageTitle);
@@ -966,7 +964,7 @@ export function trackerCore(
       tstamp?: Timestamp | null,
       afterTrack?: ((Payload: Payload) => void) | null
     ): PayloadBuilder {
-      const sb = payloadBuilder(base64);
+      const sb = payloadBuilder(encodeBase64);
       sb.add('e', 'se'); // 'se' for Structured Event
       sb.add('se_ca', category);
       sb.add('se_ac', action);
@@ -991,7 +989,7 @@ export function trackerCore(
       tstamp?: Timestamp | null,
       afterTrack?: ((Payload: Payload) => void) | null
     ): PayloadBuilder {
-      const sb = payloadBuilder(base64);
+      const sb = payloadBuilder(encodeBase64);
       sb.add('e', 'tr'); // 'tr' for Transaction
       sb.add('tr_id', orderId);
       sb.add('tr_af', affiliation);
@@ -1018,7 +1016,7 @@ export function trackerCore(
       tstamp?: Timestamp | null,
       afterTrack?: ((Payload: Payload) => void) | null
     ): PayloadBuilder {
-      const sb = payloadBuilder(base64);
+      const sb = payloadBuilder(encodeBase64);
       sb.add('e', 'ti'); // 'tr' for Transaction Item
       sb.add('ti_id', orderId);
       sb.add('ti_sk', sku);
@@ -1355,7 +1353,7 @@ export function trackerCore(
             all: all,
           }),
         },
-        documentJson.data && context ? context.concat([documentJson]) : context,
+        context ? context.concat([documentJson]) : [documentJson],
         tstamp,
         afterTrack
       );
