@@ -68,11 +68,11 @@ common/autoinstallers/*/.npmrc
 dist
 
 # Test files
-trackers/browser-tracker/test/pages/*.js
-trackers/browser-tracker/test/local/serve/
+trackers/javascript-tracker/test/pages/*.js
+trackers/javascript-tracker/test/local/serve/
 
 # Generated tag
-trackers/browser-tracker/tags/tag.min.js
+trackers/javascript-tracker/tags/tag.min.js
 
 # IDE files
 .idea/

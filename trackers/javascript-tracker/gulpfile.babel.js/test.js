@@ -28,12 +28,13 @@ import Docker from 'dockerode';
 
 export const buildTestSnowplow = async function () {
   const snowplow = await rollup({
-    input: 'src/js/iife.js',
+    input: './src/index.ts',
     plugins: core,
+    treeshake: { moduleSideEffects: ['jstimezonedetect'] },
   });
 
   return await snowplow.write({
-    file: 'test/pages/snowplow.js',
+    file: './test/pages/snowplow.js',
     format: 'iife',
   });
 };
