@@ -32,33 +32,59 @@
 //  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //  */
 
-// describe('Helpers', () => {
-//   it('Gets page title', () => {
-//     browser.url('/helpers.html');
-//     $('body.loaded').waitForExist();
-//     const value = $('#title').getText();
-//     expect(value).toBe('Helpers test page');
-//   });
+import { fixupTitle, getHostName, getReferrer, addEventListener } from '../src/helpers';
 
-//   it('Gets host name', () => {
-//     browser.url('/helpers.html');
-//     $('body.loaded').waitForExist();
-//     const value = $('#hostname').getText();
-//     expect(value).toBe('snowplow-js-tracker.local');
-//   });
+declare var jsdom: { reconfigure: (...params: any) => void };
 
-//   it('Gets referrer from querystring', () => {
-//     browser.url('/helpers.html' + '?name=value&referrer=previous#fragment');
-//     $('body.loaded').waitForExist();
-//     const value = $('#referrer').getText();
-//     expect(value).toBe('previous');
-//   });
+describe('Helpers', () => {
+  beforeAll(() => {
+    document.head.innerHTML = '<title>Helpers test page</title>';
+    document.body.innerHTML = '<div><p id="click">Click here</p></div>';
+  });
 
-//   it('Can add an event listener', () => {
-//     browser.url('/helpers.html');
-//     $('body.loaded').waitForExist();
-//     $('#click').click();
-//     const value = $('#click').getText();
-//     expect(value).toBe('clicked');
-//   });
-// });
+  it('Gets page title from document', () => {
+    const title = fixupTitle({ text: '' });
+    expect(title).toBe('Helpers test page');
+  });
+
+  it('Prefers page title from parameter', () => {
+    const title = fixupTitle('Title param');
+    expect(title).toBe('Title param');
+  });
+
+  it('Prefers page title from object parameter', () => {
+    document.head.innerHTML = '';
+    const title = fixupTitle({ text: 'Title param 2' });
+    expect(title).toBe('Title param 2');
+  });
+
+  it('Gets host name', () => {
+    const hostName = getHostName(location.href);
+    expect(hostName).toBe('snowplow-js-tracker.local');
+  });
+
+  it('Gets referrer from document', () => {
+    const referer = getReferrer();
+    expect(referer).toBe('https://example.com/'); // From jest.config.js
+  });
+
+  it('Gets referrer from querystring', () => {
+    jsdom.reconfigure({
+      url: window.location.href + '?name=value&referrer=previous#fragment',
+    });
+    const referer = getReferrer();
+    expect(referer).toBe('previous');
+  });
+
+  it('Can add an event listener', (done) => {
+    const element = document.getElementById('click');
+    if (element !== null) {
+      addEventListener(element, 'click', function () {
+        done();
+      });
+
+      var evt = new Event('click', { bubbles: false, cancelable: false, composed: false });
+      element.dispatchEvent(evt);
+    }
+  });
+});

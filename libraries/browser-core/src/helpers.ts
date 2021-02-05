@@ -138,7 +138,7 @@ export function getReferrer(oldLocation?: string) {
  * Cross-browser helper function to add event handler
  */
 export function addEventListener(
-  element: EventTarget,
+  element: HTMLElement | EventTarget,
   eventType: string,
   eventHandler: EventListenerOrEventListenerObject,
   options?: boolean | AddEventListenerOptions

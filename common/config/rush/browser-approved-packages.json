@@ -123,6 +123,10 @@
       "allowedCategories": [ "libraries", "plugins", "trackers" ]
     },
     {
+      "name": "@types/jsdom",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "@types/jsdom-global",
       "allowedCategories": [ "libraries" ]
     },
@@ -225,6 +229,14 @@
     {
       "name": "jest",
       "allowedCategories": [ "libraries", "plugins", "trackers" ]
+    },
+    {
+      "name": "jest-environment-jsdom",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "jest-environment-jsdom-global",
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "jest-standard-reporter",

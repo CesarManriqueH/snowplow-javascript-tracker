@@ -6,7 +6,6 @@ exports.config = {
   connectionRetryTimeout: 90000,
   connectionRetryCount: 3,
   specFileRetries: 1,
-
   framework: 'jasmine',
   reporters: ['spec'],
   jasmineNodeOpts: {

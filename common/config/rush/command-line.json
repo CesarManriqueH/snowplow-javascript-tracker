@@ -156,7 +156,7 @@
       "summary": "Runs unit tests in each project.",
       "description": "Runs the 'test' script within each project.json",
       "enableParallelism": true,
-      "ignoreDependencyOrder": false,
+      "ignoreDependencyOrder": true,
       "incremental": false
     },
     {
