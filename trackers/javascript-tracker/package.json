@@ -7,8 +7,9 @@
     "build": "rollup -c --silent",
     "dev": "rollup -c -w",
     "test": "jest test/unit/*.test.ts",
-    "test:e2e:sauce": "gulp buildForIntegrationTest && wdio test/wdio.sauce.conf.js",
-    "test:e2e:local": "gulp buildForIntegrationTest && wdio test/wdio.local.conf.js"
+    "build:integration": "gulp buildForIntegrationTest",
+    "test:e2e:sauce": "npm run build:integration && wdio test/wdio.sauce.conf.js",
+    "test:e2e:local": "npm run build:integration && wdio test/wdio.local.conf.js"
   },
   "dependencies": {
     "lodash": "^4.17.20",
