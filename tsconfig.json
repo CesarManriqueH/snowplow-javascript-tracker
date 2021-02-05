@@ -4,6 +4,7 @@
     /* Basic Options */
     "declaration": true /* Generates corresponding '.d.ts' file. */,
     "resolveJsonModule": true,
+    "importHelpers": true,
 
     /* Strict Type-Checking Options */
     "strict": true /* Enable all strict type-checking options. */,

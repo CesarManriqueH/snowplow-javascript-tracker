@@ -37,6 +37,12 @@ import { Core, PayloadBuilder } from '@snowplow/tracker-core';
 import isUndefined from 'lodash/isUndefined';
 import { isFunction, detectDocumentSize, detectViewport } from '@snowplow/browser-core';
 
+declare global {
+  interface MimeTypeArray {
+    [index: string]: MimeType;
+  }
+}
+
 const windowAlias = window,
   navigatorAlias = navigator,
   screenAlias = screen,
@@ -49,7 +55,7 @@ const windowAlias = window,
  */
 export function DetectTimezone() {
   return (core: Core) => {
-    core.setTimezone(determine().name());
+    core.setTimezone(determine(typeof Intl !== 'undefined').name());
   };
 }
 
@@ -57,7 +63,7 @@ export function DetectTimezone() {
  * Does browser have cookies enabled (for this site)?
  */
 export function DetectCookie() {
-  return (core: Core) => {   
+  return (core: Core) => {
     core.addPayloadPair('cookie', navigatorAlias.cookieEnabled ? '1' : '0');
   };
 }
@@ -122,8 +128,7 @@ export function DetectBrowserFeatures() {
     if (navigatorAlias.mimeTypes && navigatorAlias.mimeTypes.length) {
       for (const i in pluginMap) {
         if (Object.prototype.hasOwnProperty.call(pluginMap, i)) {
-          mimeType = navigatorAlias.mimeTypes.namedItem(pluginMap[i]);
-          console.log('f_' + i, mimeType && mimeType.enabledPlugin ? '1' : '0');
+          mimeType = navigatorAlias.mimeTypes[pluginMap[i]];
           core.addPayloadPair('f_' + i, mimeType && mimeType.enabledPlugin ? '1' : '0');
         }
       }
