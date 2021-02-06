@@ -32,60 +32,21 @@
 //  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //  */
 
-import { JSDOM } from 'jsdom';
-import { fixupTitle, getHostName, getReferrer, addEventListener } from '../src/helpers';
+import { localStorageAccessible, hasLocalStorage, hasSessionStorage } from '../src/detectors';
 
-declare var jsdom: JSDOM;
-
-describe('Helpers', () => {
-  beforeAll(() => {
-    document.head.innerHTML = '<title>Helpers test page</title>';
-    document.body.innerHTML = '<div><p id="click">Click here</p></div>';
+describe('Detectors', () => {
+  it('Checks for local storage accessibility', () => {
+    const result = localStorageAccessible();
+    expect(result).toBeTruthy();
   });
 
-  it('Gets page title from document', () => {
-    const title = fixupTitle({ text: '' });
-    expect(title).toBe('Helpers test page');
+  it('Checks for local storage', () => {
+    const result = hasLocalStorage();
+    expect(result).toBeTruthy();
   });
 
-  it('Prefers page title from parameter', () => {
-    const title = fixupTitle('Title param');
-    expect(title).toBe('Title param');
-  });
-
-  it('Prefers page title from object parameter', () => {
-    document.head.innerHTML = '';
-    const title = fixupTitle({ text: 'Title param 2' });
-    expect(title).toBe('Title param 2');
-  });
-
-  it('Gets host name', () => {
-    const hostName = getHostName(location.href);
-    expect(hostName).toBe('snowplow-js-tracker.local');
-  });
-
-  it('Gets referrer from document', () => {
-    const referer = getReferrer();
-    expect(referer).toBe('https://example.com/'); // From jest.config.js
-  });
-
-  it('Gets referrer from querystring', () => {
-    jsdom.reconfigure({
-      url: window.location.href + '?name=value&referrer=previous#fragment',
-    });
-    const referer = getReferrer();
-    expect(referer).toBe('previous');
-  });
-
-  it('Can add an event listener', (done) => {
-    const element = document.getElementById('click');
-    if (element !== null) {
-      addEventListener(element, 'click', function () {
-        done();
-      });
-
-      var evt = new Event('click', { bubbles: false, cancelable: false, composed: false });
-      element.dispatchEvent(evt);
-    }
+  it('Checks for session storage', () => {
+    const result = hasSessionStorage();
+    expect(result).toBeTruthy();
   });
 });

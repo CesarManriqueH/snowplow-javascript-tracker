@@ -32,8 +32,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-var windowAlias = window,
-  documentAlias = document;
+var windowAlias = window;
 
 /*
  * Checks whether sessionStorage is available, in a way that
@@ -78,47 +77,4 @@ export function localStorageAccessible() {
   } catch (e) {
     return false;
   }
-}
-
-/**
- * Gets the current viewport.
- *
- * Code based on:
- * - http://andylangton.co.uk/articles/javascript/get-viewport-size-javascript/
- * - http://responsejs.com/labs/dimensions/
- */
-export function detectViewport() {
-  var width, height;
-
-  if ('innerWidth' in windowAlias) {
-    width = windowAlias['innerWidth'];
-    height = windowAlias['innerHeight'];
-  } else {
-    const e = documentAlias.documentElement || documentAlias.body;
-    width = e['clientWidth'];
-    height = e['clientHeight'];
-  }
-
-  if (width >= 0 && height >= 0) {
-    return width + 'x' + height;
-  } else {
-    return null;
-  }
-}
-
-/**
- * Gets the dimensions of the current
- * document.
- *
- * Code based on:
- * - http://andylangton.co.uk/articles/javascript/get-viewport-size-javascript/
- */
-export function detectDocumentSize() {
-  var de = documentAlias.documentElement, // Alias
-    be = documentAlias.body,
-    // document.body may not have rendered, so check whether be.offsetHeight is null
-    bodyHeight = be ? Math.max(be.offsetHeight, be.scrollHeight) : 0;
-  var w = Math.max(de.clientWidth, de.offsetWidth, de.scrollWidth);
-  var h = Math.max(de.clientHeight, de.offsetHeight, de.scrollHeight, bodyHeight);
-  return isNaN(w) || isNaN(h) ? '' : w + 'x' + h;
 }

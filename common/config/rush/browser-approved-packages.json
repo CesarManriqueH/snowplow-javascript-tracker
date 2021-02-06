@@ -124,11 +124,7 @@
     },
     {
       "name": "@types/jsdom",
-      "allowedCategories": [ "libraries" ]
-    },
-    {
-      "name": "@types/jsdom-global",
-      "allowedCategories": [ "libraries" ]
+      "allowedCategories": [ "libraries", "plugins" ]
     },
     {
       "name": "@types/jstimezonedetect",
@@ -232,11 +228,11 @@
     },
     {
       "name": "jest-environment-jsdom",
-      "allowedCategories": [ "libraries" ]
+      "allowedCategories": [ "libraries", "plugins" ]
     },
     {
       "name": "jest-environment-jsdom-global",
-      "allowedCategories": [ "libraries" ]
+      "allowedCategories": [ "libraries", "plugins" ]
     },
     {
       "name": "jest-standard-reporter",
@@ -264,7 +260,7 @@
     },
     {
       "name": "moment-timezone",
-      "allowedCategories": [ "trackers" ]
+      "allowedCategories": [ "plugins", "trackers" ]
     },
     {
       "name": "prettier",
