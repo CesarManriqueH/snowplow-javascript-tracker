@@ -41,17 +41,11 @@
 export { TrackerApi } from './tracker';
 import { Tracker, TrackerApi } from './tracker';
 import { version } from './version';
-import { DetectScreen, DetectWindow, DetectDocument } from '@snowplow/browser-detectors';
 import { warn, newSharedState, SharedState } from '@snowplow/browser-core';
 import pickBy from 'lodash/pickBy';
 import includes from 'lodash/includes';
 
 const groups: Record<string, { state: SharedState; trackers: Record<string, TrackerApi> }> = {};
-const defaultDetectors = {
-  screen: DetectScreen(),
-  window: DetectWindow(),
-  document: DetectDocument(),
-};
 
 /**
  * Initiate a new tracker
@@ -71,7 +65,6 @@ export const newTracker = (
     groups[trackerGroup] = { state: newSharedState(), trackers: {} };
   }
 
-  argmap.detectors = argmap.detectors ?? defaultDetectors;
   const trackerDictionary = groups[trackerGroup].trackers;
   const state = groups[trackerGroup].state;
 

@@ -52,6 +52,8 @@ import {
   cookie,
   deleteCookie,
   fixupUrl,
+  detectViewport,
+  detectDocumentSize,
   SharedState,
   ApiMethods,
   BrowserApiPlugin,
@@ -846,7 +848,7 @@ export function Tracker(
    * Private members
    ************************************************************/
 
-  var argmap = argmap || {};
+  argmap = argmap || {};
 
   //use POST if eventMethod isn't present on the argmap
   argmap.eventMethod = argmap.eventMethod || 'post';
@@ -896,6 +898,9 @@ export function Tracker(
     documentAlias = document,
     windowAlias = window,
     navigatorAlias = navigator,
+    screenAlias = screen,
+    browserLanguage = (navigatorAlias as any).userLanguage || navigatorAlias.language,
+    documentCharset = documentAlias.characterSet || documentAlias.charset,
     // Current URL and Referrer URL
     locationArray = fixupUrl(documentAlias.domain, windowAlias.location.href, getReferrer()),
     domainAlias = fixupDomain(locationArray[0]),
@@ -1030,12 +1035,14 @@ export function Tracker(
   core.setTrackerNamespace(namespace);
   core.setAppId(configTrackerSiteId);
   core.setPlatform(configPlatform);
+  core.addPayloadPair('cookie', navigatorAlias.cookieEnabled ? '1' : '0');
+  core.addPayloadPair('cs', documentCharset);
+  core.addPayloadPair('lang', browserLanguage);
+  core.addPayloadPair('res', screenAlias.width + 'x' + screenAlias.height);
+  core.addPayloadPair('cd', screenAlias.colorDepth);
 
   if (detectors.timezone) detectors.timezone(core);
   if (detectors.browserFeatures) detectors.browserFeatures(core);
-  if (detectors.screen) detectors.screen(core);
-  if (detectors.document) detectors.document(core);
-  if (detectors.cookie) detectors.cookie(core);
 
   /**
    * Recalculate the domain, URL, and referrer
@@ -1504,8 +1511,8 @@ export function Tracker(
       memorizedVisitCount++;
     }
 
-    // Build out the rest of the request
-    if (detectors.window) detectors.window(payloadBuilder);
+    payloadBuilder.add('vp', detectViewport());
+    payloadBuilder.add('ds', detectDocumentSize());
     payloadBuilder.add('vid', anonymizeSessionOr(memorizedVisitCount));
     payloadBuilder.add('sid', anonymizeSessionOr(memorizedSessionId));
     payloadBuilder.add('duid', anonymizeOr(_domainUserId)); // Set to our local variable

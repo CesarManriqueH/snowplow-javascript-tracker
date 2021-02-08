@@ -9,14 +9,7 @@ import { GaCookiesPlugin } from '@snowplow/browser-plugin-ga-cookies';
 import { LinkClickTrackingPlugin } from '@snowplow/browser-plugin-link-click-tracking';
 import { FormTrackingPlugin } from '@snowplow/browser-plugin-form-tracking';
 import { ErrorTrackingPlugin } from '@snowplow/browser-plugin-error-tracking';
-import {
-  DetectScreen,
-  DetectDocument,
-  DetectWindow,
-  DetectCookie,
-  DetectTimezone,
-  DetectBrowserFeatures,
-} from '@snowplow/browser-detectors';
+import { DetectTimezone, DetectBrowserFeatures } from '@snowplow/browser-detectors';
 import { plugins, detectors } from '../tracker.config';
 
 export function Plugins(argmap: any) {
@@ -114,24 +107,8 @@ export function Plugins(argmap: any) {
 }
 
 export function Detectors(argmap: any) {
-  const { cookie, screen, window, document, timezone, browserFeatures } = argmap?.detectors ?? {},
+  const { timezone, browserFeatures } = argmap?.detectors ?? {},
     selectedDetectors: any = {};
-
-  if (detectors.cookie && (cookie ?? true)) {
-    selectedDetectors.cookie = DetectCookie();
-  }
-
-  if (detectors.screen && (screen ?? true)) {
-    selectedDetectors.screen = DetectScreen();
-  }
-
-  if (detectors.window && (window ?? true)) {
-    selectedDetectors.window = DetectWindow();
-  }
-
-  if (detectors.document && (document ?? true)) {
-    selectedDetectors.document = DetectDocument();
-  }
 
   if (detectors.timezone && (timezone ?? true)) {
     selectedDetectors.timezone = DetectTimezone();

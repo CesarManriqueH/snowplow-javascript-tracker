@@ -33,7 +33,7 @@
  */
 
 import { determine } from 'jstimezonedetect';
-import { Core, PayloadBuilder } from '@snowplow/tracker-core';
+import { Core } from '@snowplow/tracker-core';
 import isUndefined from 'lodash/isUndefined';
 import { isFunction } from '@snowplow/browser-core';
 
@@ -44,11 +44,7 @@ declare global {
 }
 
 const windowAlias = window,
-  navigatorAlias = navigator,
-  screenAlias = screen,
-  documentAlias = document,
-  browserLanguage = (navigatorAlias as any).userLanguage || navigatorAlias.language,
-  documentCharset = documentAlias.characterSet || documentAlias.charset;
+  navigatorAlias = navigator;
 
 /*
  * Returns visitor timezone
@@ -56,46 +52,6 @@ const windowAlias = window,
 export function DetectTimezone() {
   return (core: Core) => {
     core.setTimezone(determine(typeof Intl !== 'undefined').name());
-  };
-}
-
-/*
- * Does browser have cookies enabled (for this site)?
- */
-export function DetectCookie() {
-  return (core: Core) => {
-    core.addPayloadPair('cookie', navigatorAlias.cookieEnabled ? '1' : '0');
-  };
-}
-
-/*
- * Detect features that are available in this browser
- */
-export function DetectDocument() {
-  return (core: Core) => {
-    core.addPayloadPair('cs', documentCharset);
-    core.addPayloadPair('lang', browserLanguage);
-  };
-}
-
-/*
- * Detect features that are available in this browser
- */
-export function DetectScreen() {
-  return (core: Core) => {
-    core.addPayloadPair('res', screenAlias.width + 'x' + screenAlias.height);
-    core.addPayloadPair('cd', screenAlias.colorDepth);
-  };
-}
-
-/*
- * Detect features that are available in this browser
- */
-export function DetectWindow() {
-  return (payload: PayloadBuilder) => {
-    // Other browser features
-    payload.add('vp', detectViewport());
-    payload.add('ds', detectDocumentSize());
   };
 }
 
@@ -149,47 +105,4 @@ export function DetectBrowserFeatures() {
       core.addPayloadPair('f_gears', '1');
     }
   };
-}
-
-/**
- * Gets the current viewport.
- *
- * Code based on:
- * - http://andylangton.co.uk/articles/javascript/get-viewport-size-javascript/
- * - http://responsejs.com/labs/dimensions/
- */
-function detectViewport() {
-  var width, height;
-
-  if ('innerWidth' in windowAlias) {
-    width = windowAlias['innerWidth'];
-    height = windowAlias['innerHeight'];
-  } else {
-    const e = documentAlias.documentElement || documentAlias.body;
-    width = e['clientWidth'];
-    height = e['clientHeight'];
-  }
-
-  if (width >= 0 && height >= 0) {
-    return width + 'x' + height;
-  } else {
-    return null;
-  }
-}
-
-/**
- * Gets the dimensions of the current
- * document.
- *
- * Code based on:
- * - http://andylangton.co.uk/articles/javascript/get-viewport-size-javascript/
- */
-function detectDocumentSize() {
-  var de = documentAlias.documentElement, // Alias
-    be = documentAlias.body,
-    // document.body may not have rendered, so check whether be.offsetHeight is null
-    bodyHeight = be ? Math.max(be.offsetHeight, be.scrollHeight) : 0;
-  var w = Math.max(de.clientWidth, de.offsetWidth, de.scrollWidth);
-  var h = Math.max(de.clientHeight, de.offsetHeight, de.scrollHeight, bodyHeight);
-  return isNaN(w) || isNaN(h) ? '' : w + 'x' + h;
 }
