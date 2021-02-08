@@ -8,13 +8,13 @@ import {
   getFilterByClass,
   getFilterByName,
   addEventListener,
-  BrowserApiPlugin,
+  ApiPlugin,
   ApiMethods,
   DynamicContexts,
   SharedState,
   FilterCriterion,
 } from '@snowplow/browser-core';
-import { Core } from '@snowplow/tracker-core';
+import { Core, Plugin } from '@snowplow/tracker-core';
 
 interface FormTrackingConfig {
   forms: FilterCriterion<HTMLElement>;
@@ -42,11 +42,11 @@ interface ElementData extends Record<string, string | null | undefined> {
 
 type transformFn = (x: string | null, _?: ElementData | TrackedHTMLElement) => string | null;
 
-const FormTrackingPlugin = (): BrowserApiPlugin<FormMethods> => {
+const FormTrackingPlugin = (): Plugin & ApiPlugin<FormMethods> => {
   let _core: Core,
     _state: SharedState,
-    innerElementTags: Array<keyof TrackedHTMLElementTagNameMap> = ['textarea', 'input', 'select'],
-    trackingMarker: string;
+    _trackingMarker: string,
+    innerElementTags: Array<keyof TrackedHTMLElementTagNameMap> = ['textarea', 'input', 'select'];
 
   // Filter to determine which forms should be tracked
   var formFilter = function (_: HTMLFormElement) {
@@ -121,7 +121,7 @@ const FormTrackingPlugin = (): BrowserApiPlugin<FormMethods> => {
     var innerElements: Array<ElementData> = [];
     forEach(innerElementTags, (tagname: 'textarea' | 'input' | 'select') => {
       var trackedChildren = filter(elt.getElementsByTagName(tagname), function (child) {
-        return child.hasOwnProperty(trackingMarker);
+        return child.hasOwnProperty(_trackingMarker);
       });
 
       forEach(trackedChildren, function (child) {
@@ -209,32 +209,34 @@ const FormTrackingPlugin = (): BrowserApiPlugin<FormMethods> => {
    */
   function addFormListeners(context: DynamicContexts) {
     forEach(document.getElementsByTagName('form'), function (form) {
-      if (formFilter(form) && !form[trackingMarker]) {
+      if (formFilter(form) && !form[_trackingMarker]) {
         forEach(innerElementTags, function (tagname) {
           forEach(form.getElementsByTagName(tagname), function (innerElement) {
             if (
               fieldFilter(innerElement) &&
-              !(innerElement as any)[trackingMarker] &&
+              !(innerElement as any)[_trackingMarker] &&
               innerElement.type.toLowerCase() !== 'password'
             ) {
               addEventListener(innerElement, 'focus', getFormChangeListener('focus_form', context), false);
               addEventListener(innerElement, 'change', getFormChangeListener('change_form', context), false);
-              (innerElement as any)[trackingMarker] = true;
+              (innerElement as any)[_trackingMarker] = true;
             }
           });
         });
 
         addEventListener(form, 'submit', getFormSubmissionListener(context));
-        form[trackingMarker] = true;
+        form[_trackingMarker] = true;
       }
     });
   }
 
   return {
-    initialise: (core: Core, trackerId: string, state: SharedState) => {
+    coreInit: (core: Core) => {
       _core = core;
+    },
+    trackerInit: (trackerId: string, state: SharedState) => {
       _state = state;
-      trackingMarker = trackerId + 'form';
+      _trackingMarker = trackerId + 'form';
     },
     apiMethods: {
       /**

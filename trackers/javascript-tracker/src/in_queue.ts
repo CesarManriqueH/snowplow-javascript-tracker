@@ -122,8 +122,7 @@ export function InQueueManager(functionName: string, asyncQueue: Array<unknown>)
         const plugins = Plugins(parameterArray[2]);
         parameterArray[2] = {
           ...parameterArray[2],
-          contextPlugins: plugins.contextPlugins,
-          apiPlugins: plugins.apiPlugins,
+          plugins: plugins,
         };
         newTracker(parameterArray[0], parameterArray[1], parameterArray[2], functionName);
         continue;

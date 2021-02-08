@@ -16,7 +16,7 @@
 import { PayloadBuilder, Payload, isNonEmptyJson } from './payload';
 import { SelfDescribingJson } from './core';
 import { base64urldecode } from './base64';
-import { ContextPlugin } from './plugins';
+import { Plugin } from './plugins';
 import isEqual from 'lodash/isEqual';
 import has from 'lodash/has';
 import get from 'lodash/get';
@@ -206,7 +206,7 @@ export interface PluginContexts {
   addPluginContexts: (additionalContexts?: SelfDescribingJson[] | null) => SelfDescribingJson[];
 }
 
-export function pluginContexts(plugins?: Array<ContextPlugin>): PluginContexts {
+export function pluginContexts(plugins: Array<Plugin>): PluginContexts {
   /**
    * Add common contexts to every event
    *
@@ -217,9 +217,13 @@ export function pluginContexts(plugins?: Array<ContextPlugin>): PluginContexts {
     addPluginContexts: (additionalContexts?: SelfDescribingJson[] | null): SelfDescribingJson[] => {
       const combinedContexts: SelfDescribingJson[] = additionalContexts ?? [];
 
-      plugins?.forEach((plugin) => {
-        if (plugin.getContexts) {
-          combinedContexts.push(...plugin.getContexts());
+      plugins.forEach((plugin) => {
+        try {
+          if (plugin.contexts) {
+            combinedContexts.push(...plugin.contexts());
+          }
+        } catch (ex) {
+          console.warn('Snowplow: error with plugin context', ex);
         }
       });
 

@@ -1,5 +1,5 @@
-import { BrowserApiPlugin, isFunction } from '@snowplow/browser-core';
-import { Core } from '@snowplow/tracker-core';
+import { isFunction } from '@snowplow/browser-core';
+import { Core, Plugin } from '@snowplow/tracker-core';
 import isUndefined from 'lodash/isUndefined';
 
 declare global {
@@ -11,9 +11,9 @@ declare global {
 const windowAlias = window,
   navigatorAlias = navigator;
 
-export const BrowserFeaturesPlugin = (): BrowserApiPlugin<{}> => {
+export const BrowserFeaturesPlugin = (): Plugin => {
   return {
-    initialise: (core: Core) => {
+    coreInit: (core: Core) => {
       let mimeType,
         pluginMap: Record<string, string> = {
           // document types
@@ -61,6 +61,5 @@ export const BrowserFeaturesPlugin = (): BrowserApiPlugin<{}> => {
         core.addPayloadPair('f_gears', '1');
       }
     },
-    apiMethods: {},
   };
 };

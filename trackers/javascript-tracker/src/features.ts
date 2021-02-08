@@ -12,6 +12,8 @@ import { ErrorTrackingPlugin } from '@snowplow/browser-plugin-error-tracking';
 import { BrowserFeaturesPlugin } from '@snowplow/browser-plugin-browser-features';
 import { TimezonePlugin } from '@snowplow/browser-plugin-timezone';
 import { plugins } from '../tracker.config';
+import { Plugin } from '@snowplow/tracker-core';
+import { ApiMethods, ApiPlugin } from '@snowplow/browser-core';
 
 export function Plugins(argmap: any) {
   const {
@@ -31,13 +33,12 @@ export function Plugins(argmap: any) {
     } = argmap?.contexts ?? {},
     gdprPlugin = plugins.gdpr ? GdprPlugin() : null,
     geolocationPlugin = plugins.geolocation ? GeolocationPlugin(geolocation) : null,
-    contextPlugins = [],
-    apiPlugins = [];
+    activatedPlugins: Array<Plugin | ApiPlugin<ApiMethods>> = [];
 
   // --- Context Plugins ---
 
   if (plugins.optimizely) {
-    contextPlugins.push(
+    activatedPlugins.push(
       OptimizelyPlugin(
         optimizelySummary,
         optimizelyExperiments,
@@ -51,66 +52,63 @@ export function Plugins(argmap: any) {
   }
 
   if (plugins.performanceTiming && performanceTiming) {
-    contextPlugins.push(PerformanceTimingPlugin());
+    activatedPlugins.push(PerformanceTimingPlugin());
   }
 
   if (plugins.optimizelyX && optimizelyXSummary) {
-    contextPlugins.push(OptimizelyXPlugin());
+    activatedPlugins.push(OptimizelyXPlugin());
   }
 
   if (plugins.clientHints && clientHints) {
-    contextPlugins.push(ClientHintsPlugin(clientHints.includeHighEntropy ? true : false));
+    activatedPlugins.push(ClientHintsPlugin(clientHints.includeHighEntropy ? true : false));
   }
 
   if (plugins.parrable && parrable) {
-    contextPlugins.push(ParrablePlugin());
+    activatedPlugins.push(ParrablePlugin());
   }
 
   if (plugins.gaCookies && gaCookies) {
-    contextPlugins.push(GaCookiesPlugin());
+    activatedPlugins.push(GaCookiesPlugin());
   }
 
   if (geolocationPlugin) {
     // Always add as has API which could enable the context
-    contextPlugins.push(geolocationPlugin);
+    activatedPlugins.push(geolocationPlugin);
   }
 
   if (gdprPlugin) {
     // Always add as has API which could enable the context
-    contextPlugins.push(gdprPlugin);
+    activatedPlugins.push(gdprPlugin);
   }
 
   // --- API Plugins ---
   if (geolocationPlugin) {
-    apiPlugins.push(geolocationPlugin);
+    activatedPlugins.push(geolocationPlugin);
   }
 
   if (gdprPlugin) {
-    apiPlugins.push(gdprPlugin);
+    activatedPlugins.push(gdprPlugin);
   }
 
   if (plugins.linkClickTracking) {
-    apiPlugins.push(LinkClickTrackingPlugin());
+    activatedPlugins.push(LinkClickTrackingPlugin());
   }
 
   if (plugins.formTracking) {
-    apiPlugins.push(FormTrackingPlugin());
+    activatedPlugins.push(FormTrackingPlugin());
   }
 
   if (plugins.errorTracking) {
-    apiPlugins.push(ErrorTrackingPlugin());
+    activatedPlugins.push(ErrorTrackingPlugin());
   }
 
   if (plugins.browserFeatures) {
-    apiPlugins.push(BrowserFeaturesPlugin());
+    activatedPlugins.push(BrowserFeaturesPlugin());
   }
 
   if (plugins.timezone) {
-    apiPlugins.push(TimezonePlugin());
+    activatedPlugins.push(TimezonePlugin());
   }
 
-  return {
-    contextPlugins: contextPlugins,
-    apiPlugins: apiPlugins,
-  };
+  return activatedPlugins;
 }

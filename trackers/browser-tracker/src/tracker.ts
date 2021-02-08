@@ -56,7 +56,7 @@ import {
   detectDocumentSize,
   SharedState,
   ApiMethods,
-  BrowserApiPlugin,
+  ApiPlugin,
 } from '@snowplow/browser-core';
 import sha1 from 'sha1';
 import { v4 as uuid } from 'uuid';
@@ -70,7 +70,7 @@ import {
   SelfDescribingJson,
   Timestamp,
   trackerCore,
-  ContextPlugin,
+  Plugin,
 } from '@snowplow/tracker-core';
 
 type ActivityConfig = {
@@ -869,10 +869,10 @@ export function Tracker(
 
   const getAnonymousTracking = (config: AnonymousTrackingOptions) => !!config.anonymousTracking;
 
-  let contextPlugins: Array<ContextPlugin> = argmap.contextPlugins || [];
-  let webPageContext = argmap?.contexts?.webPage ?? true;
-  if (webPageContext) {
-    contextPlugins = contextPlugins.concat(getWebPagePlugin());
+  let plugins = argmap.plugins || [];
+
+  if (argmap?.contexts?.webPage ?? true) {
+    plugins.push(getWebPagePlugin());
   }
 
   var // Tracker core
@@ -882,18 +882,13 @@ export function Tracker(
         addBrowserData(payloadBuilder);
         sendRequest(payloadBuilder, configTrackerPause);
       },
-      contextPlugins
+      plugins as Array<Plugin>
     ),
     // Debug - whether to raise errors to console and log to console
     // or silence all errors from public methods
     debug = false,
     // API functions of the tracker
     apiMethods: Record<string, Function> = {},
-    // Safe methods (i.e. ones that won't raise errors)
-    // These values should be guarded publicMethods
-    safeMethods: TrackerApi,
-    // The client-facing methods returned from tracker IIFE
-    returnMethods: TrackerApi,
     // Aliases
     documentAlias = document,
     windowAlias = window,
@@ -1022,8 +1017,7 @@ export function Tracker(
       enabled: false,
       installed: false, // Guard against installing the activity tracker more than once per Tracker instance
       configurations: {},
-    },
-    apiPlugins = argmap.apiPlugins || [];
+    };
 
   if (argmap.hasOwnProperty('discoverRootDomain') && argmap.discoverRootDomain) {
     configCookieDomain = findRootDomain(configCookieSameSite, configCookieSecure);
@@ -1575,7 +1569,7 @@ export function Tracker(
    */
   function getWebPagePlugin() {
     return {
-      getContexts: () => {
+      contexts: () => {
         return [
           {
             schema: 'iglu:com.snowplowanalytics.snowplow/web_page/jsonschema/1-0-0',
@@ -2944,11 +2938,10 @@ export function Tracker(
    */
   apiMethods.clearUserData = deleteCookies;
 
-  // Create guarded methods from apiMethods,
-  // and set returnMethods to apiMethods or safeMethods depending on value of debug
-  const combinedApiMethods = (apiPlugins as Array<BrowserApiPlugin<ApiMethods>>).reduce((prev, current) => {
-    if (current.initialise) {
-      current.initialise(core, trackerId, mutSnowplowState);
+  // Merge api plugin methods into plugin tracker API
+  const combinedApiMethods = (plugins as Array<ApiPlugin<ApiMethods>>).reduce((prev, current) => {
+    if (current.trackerInit) {
+      current.trackerInit(trackerId, mutSnowplowState);
     }
     if (current.apiMethods) {
       return {
@@ -2958,13 +2951,11 @@ export function Tracker(
     }
     return prev;
   }, apiMethods) as TrackerApi;
-  safeMethods = productionize(combinedApiMethods);
 
+  // Create guarded methods from apiMethods,
   if (debug) {
-    returnMethods = apiMethods as TrackerApi;
+    return combinedApiMethods;
   } else {
-    returnMethods = safeMethods;
+    return productionize(combinedApiMethods);
   }
-
-  return returnMethods as TrackerApi;
 }

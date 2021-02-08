@@ -23,7 +23,7 @@ export {
   FilterProvider,
   ConditionalContextProvider,
 } from './contexts';
-export { ContextPlugin } from './plugins';
+export { Plugin } from './plugins';
 export { PayloadBuilder, Payload } from './payload';
 export { Core, SelfDescribingJson, SelfDescribingJsonArray, Timestamp, TrueTimestamp, DeviceTimestamp } from './core';
 export { trackerCore } from './core';

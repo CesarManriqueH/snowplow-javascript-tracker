@@ -14,7 +14,7 @@
  */
 
 import { v4 } from 'uuid';
-import { ContextPlugin } from './plugins';
+import { Plugin } from './plugins';
 import { payloadBuilder, PayloadBuilder, Payload, isJson } from './payload';
 import {
   globalContexts,
@@ -696,10 +696,11 @@ export interface Core {
 export function trackerCore(
   base64?: boolean,
   callback?: (PayloadData: PayloadBuilder) => void,
-  plugins?: Array<ContextPlugin>
+  corePlugins?: Array<Plugin>
 ): Core {
-  const globalContextsHelper: GlobalContexts = globalContexts();
+  const plugins = corePlugins ?? [];
   const pluginContextsHelper: PluginContexts = pluginContexts(plugins);
+  const globalContextsHelper: GlobalContexts = globalContexts();
 
   // Dictionary of key-value pairs which get added to every payload, e.g. tracker version
   let payloadPairs: Payload = {};
@@ -793,9 +794,29 @@ export function trackerCore(
       sb.addJson('cx', 'co', wrappedContexts);
     }
 
+    plugins.forEach((plugin) => {
+      try {
+        if (plugin.beforeTrack) {
+          plugin.beforeTrack(sb);
+        }
+      } catch (ex) {
+        console.warn('Snowplow: error with plugin beforeTrack', ex);
+      }
+    });
+
     if (typeof callback === 'function') {
       callback(sb);
     }
+
+    plugins.forEach((plugin) => {
+      try {
+        if (plugin.afterTrack) {
+          plugin.afterTrack(sb.build());
+        }
+      } catch (ex) {
+        console.warn('Snowplow: error with plugin afterTrack', ex);
+      }
+    });
 
     try {
       afterTrack && afterTrack(sb.build());
@@ -843,7 +864,7 @@ export function trackerCore(
     payloadPairs[key] = value;
   };
 
-  return {
+  const core = {
     addPayloadPair,
 
     setBase64Encoding(encode: boolean): void {
@@ -1404,4 +1425,16 @@ export function trackerCore(
       globalContextsHelper.removeGlobalContexts(contexts);
     },
   };
+
+  plugins.forEach((plugin) => {
+    try {
+      if (plugin.coreInit) {
+        plugin.coreInit(core);
+      }
+    } catch (ex) {
+      console.warn('Snowplow: error with plugin coreInit', ex);
+    }
+  });
+
+  return core;
 }
