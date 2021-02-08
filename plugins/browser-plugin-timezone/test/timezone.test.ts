@@ -31,7 +31,6 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-import { SharedState } from '@snowplow/browser-core';
 import { trackerCore } from '@snowplow/tracker-core';
 import { tz } from 'moment-timezone';
 import { TimezonePlugin } from '../src/index';
@@ -43,7 +42,7 @@ describe('Timezone Plugin', () => {
       expect(tz.names().includes(payload['tz'] as string)).toBeTruthy();
       done();
     });
-    TimezonePlugin().initialise?.(core, 'id', new SharedState());
+    TimezonePlugin().coreInit?.(core);
     core.trackLinkClick('https://example.com');
   });
 });

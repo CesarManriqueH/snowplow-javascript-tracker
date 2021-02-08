@@ -31,7 +31,6 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-import { SharedState } from '@snowplow/browser-core';
 import { trackerCore } from '@snowplow/tracker-core';
 import { JSDOM } from 'jsdom';
 import { BrowserFeaturesPlugin } from '../src/index';
@@ -55,7 +54,7 @@ describe('Browser Features plugin', () => {
       done();
     });
 
-    BrowserFeaturesPlugin().initialise?.(core, 'id', new SharedState());
+    BrowserFeaturesPlugin().coreInit?.(core);
     core.trackLinkClick('https://example.com');
   });
 
@@ -90,7 +89,7 @@ describe('Browser Features plugin', () => {
       done();
     });
 
-    BrowserFeaturesPlugin().initialise?.(core, 'id', new SharedState());
+    BrowserFeaturesPlugin().coreInit?.(core);
     core.trackLinkClick('https://example.com');
   });
 });
