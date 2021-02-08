@@ -2,6 +2,28 @@
   "name": "@snowplow/javascript-tracker",
   "version": "2.17.0",
   "private": true,
+  "description": "JavaScript tracker for Snowplow",
+  "keywords": [
+    "tracking",
+    "web analytics",
+    "events",
+    "open source"
+  ],
+  "bugs": "https://github.com/snowplow/snowplow-javascript-tracker/issues",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/snowplow/snowplow-javascript-tracker.git"
+  },
+  "license": "Simplified BSD",
+  "contributors": [
+    "Alex Dean",
+    "Simon Andersson",
+    "Anthon Pang",
+    "Fred Blundun",
+    "Joshua Beemster",
+    "Michael Hadam",
+    "Paul Boocock"
+  ],
   "main": "dist/sp.js",
   "scripts": {
     "build": "rollup -c --silent",
@@ -15,31 +37,33 @@
     "wdio:sauce": "wdio test/wdio.sauce.conf.js"
   },
   "dependencies": {
-    "lodash": "^4.17.20",
-    "tslib": "^2.0.3",
-    "@snowplow/tracker-core": "workspace:*",
     "@snowplow/browser-core": "workspace:*",
-    "@snowplow/browser-tracker": "workspace:*",
     "@snowplow/browser-detectors": "workspace:*",
-    "@snowplow/browser-plugin-optimizely": "workspace:*",
-    "@snowplow/browser-plugin-optimizely-x": "workspace:*",
     "@snowplow/browser-plugin-client-hints": "workspace:*",
-    "@snowplow/browser-plugin-parrable": "workspace:*",
-    "@snowplow/browser-plugin-performance-timing": "workspace:*",
-    "@snowplow/browser-plugin-gdpr": "workspace:*",
+    "@snowplow/browser-plugin-error-tracking": "workspace:*",
+    "@snowplow/browser-plugin-form-tracking": "workspace:*",
     "@snowplow/browser-plugin-ga-cookies": "workspace:*",
+    "@snowplow/browser-plugin-gdpr": "workspace:*",
     "@snowplow/browser-plugin-geolocation": "workspace:*",
     "@snowplow/browser-plugin-link-click-tracking": "workspace:*",
-    "@snowplow/browser-plugin-form-tracking": "workspace:*",
-    "@snowplow/browser-plugin-error-tracking": "workspace:*"
+    "@snowplow/browser-plugin-optimizely": "workspace:*",
+    "@snowplow/browser-plugin-optimizely-x": "workspace:*",
+    "@snowplow/browser-plugin-parrable": "workspace:*",
+    "@snowplow/browser-plugin-performance-timing": "workspace:*",
+    "@snowplow/browser-tracker": "workspace:*",
+    "@snowplow/tracker-core": "workspace:*",
+    "lodash": "^4.17.20",
+    "tslib": "^2.0.3"
   },
   "devDependencies": {
     "@ampproject/rollup-plugin-closure-compiler": "^0.26.0",
     "@rollup/plugin-commonjs": "^17.0.0",
     "@rollup/plugin-json": "^4.1.0",
     "@rollup/plugin-node-resolve": "^11.0.0",
+    "@types/dockerode": "^3.2.2",
     "@types/jest": "^26.0.20",
     "@types/lodash": "^4.14.168",
+    "@types/node": "^14.6.0",
     "@wdio/cli": "^6.12.1",
     "@wdio/jasmine-framework": "^6.11.0",
     "@wdio/local-runner": "^6.12.1",
@@ -52,6 +76,8 @@
     "dockerode": "^3.2.1",
     "gulp": "^4.0.2",
     "jest": "^26.6.3",
+    "jest-standard-reporter": "^2.0.0",
+    "npm-run-all": "^4.1.5",
     "prettier": "^2.1.1",
     "rollup": "^2.34.0",
     "rollup-plugin-banner": "^0.2.1",
@@ -60,34 +86,8 @@
     "rollup-plugin-sizes": "^1.0.3",
     "saucelabs": "^4.6.0",
     "ts-jest": "^26.5.0",
-    "typescript": "^4.1.2",
-    "wdio-chromedriver-service": "^6.0.4",
-    "jest-standard-reporter": "^2.0.0",
     "ts-node": "^9.1.1",
-    "@types/node": "^14.6.0",
-    "@types/dockerode": "^3.2.2",
-    "npm-run-all": "^4.1.5"
-  },
-  "contributors": [
-    "Alex Dean",
-    "Simon Andersson",
-    "Anthon Pang",
-    "Fred Blundun",
-    "Joshua Beemster",
-    "Michael Hadam",
-    "Paul Boocock"
-  ],
-  "description": "JavaScript tracker for Snowplow",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/snowplow/snowplow-javascript-tracker.git"
-  },
-  "bugs": "https://github.com/snowplow/snowplow-javascript-tracker/issues",
-  "keywords": [
-    "tracking",
-    "web analytics",
-    "events",
-    "open source"
-  ],
-  "license": "Simplified BSD"
+    "typescript": "^4.1.2",
+    "wdio-chromedriver-service": "^6.0.4"
+  }
 }
