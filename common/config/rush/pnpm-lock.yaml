@@ -10,7 +10,6 @@ importers:
       '@types/jest': 26.0.20
       '@types/jsdom': 16.2.6
       '@types/lodash': 4.14.168
-      '@types/node': 14.14.14
       '@typescript-eslint/eslint-plugin': 4.11.0_1b9a0c47bb6bc72fe9ec08ec801e03a4
       '@typescript-eslint/parser': 4.11.0_eslint@7.16.0+typescript@4.1.3
       '@wessberg/rollup-plugin-ts': 1.3.8_rollup@2.35.1+typescript@4.1.3
@@ -19,7 +18,6 @@ importers:
       jest-environment-jsdom: 26.6.2
       jest-environment-jsdom-global: 2.0.4_jest-environment-jsdom@26.6.2
       jest-standard-reporter: 2.0.0
-      prettier: 2.2.1
       rollup: 2.35.1
       ts-jest: 26.5.0_jest@26.6.3+typescript@4.1.3
       typescript: 4.1.3
@@ -28,17 +26,15 @@ importers:
       '@types/jest': ^26.0.20
       '@types/jsdom': ^16.2.6
       '@types/lodash': ^4.14.168
-      '@types/node': ^14.6.0
       '@typescript-eslint/eslint-plugin': ^4.9.0
       '@typescript-eslint/parser': ^4.9.0
       '@wessberg/rollup-plugin-ts': ^1.3.8
       eslint: ^7.7.0
       jest: ^26.6.3
-      jest-environment-jsdom: ~26.6.2
-      jest-environment-jsdom-global: ~2.0.4
-      jest-standard-reporter: ~2.0.0
+      jest-environment-jsdom: ^26.6.2
+      jest-environment-jsdom-global: ^2.0.4
+      jest-standard-reporter: ^2.0.0
       lodash: ^4.17.20
-      prettier: ^2.1.1
       rollup: ^2.34.0
       ts-jest: ^26.5.0
       tslib: ^2.0.3
@@ -58,7 +54,6 @@ importers:
       ava: 3.14.0
       eslint: 7.16.0
       jest-standard-reporter: 2.0.0
-      prettier: 2.2.1
       rollup: 2.35.1
       ts-node: 9.1.1_typescript@4.1.3
       typescript: 4.1.3
@@ -71,11 +66,10 @@ importers:
       '@wessberg/rollup-plugin-ts': ^1.3.8
       ava: ^3.13.0
       eslint: ^7.7.0
-      jest-standard-reporter: ~2.0.0
+      jest-standard-reporter: ^2.0.0
       lodash: ^4.17.20
-      prettier: ^2.1.1
       rollup: ^2.34.0
-      ts-node: ^9.0.0
+      ts-node: ^9.1.1
       tslib: ^2.0.3
       typescript: ^4.1.2
       uuid: ^3.3.3
@@ -91,7 +85,6 @@ importers:
       '@types/jsdom': 16.2.6
       '@types/jstimezonedetect': 1.0.3
       '@types/lodash': 4.14.168
-      '@types/node': 14.14.14
       '@typescript-eslint/eslint-plugin': 4.11.0_1b9a0c47bb6bc72fe9ec08ec801e03a4
       '@typescript-eslint/parser': 4.11.0_eslint@7.16.0+typescript@4.1.3
       '@wessberg/rollup-plugin-ts': 1.3.8_rollup@2.35.1+typescript@4.1.3
@@ -101,7 +94,6 @@ importers:
       jest-environment-jsdom-global: 2.0.4_jest-environment-jsdom@26.6.2
       jest-standard-reporter: 2.0.0
       moment-timezone: 0.5.32
-      prettier: 2.2.1
       rollup: 2.35.1
       ts-jest: 26.5.0_jest@26.6.3+typescript@4.1.3
       typescript: 4.1.3
@@ -109,22 +101,60 @@ importers:
       '@snowplow/browser-core': 'workspace:*'
       '@snowplow/tracker-core': 'workspace:*'
       '@types/jest': ^26.0.20
-      '@types/jsdom': ~16.2.6
+      '@types/jsdom': ^16.2.6
       '@types/jstimezonedetect': ~1.0.3
       '@types/lodash': ^4.14.168
-      '@types/node': ^14.6.0
       '@typescript-eslint/eslint-plugin': ^4.9.0
       '@typescript-eslint/parser': ^4.9.0
       '@wessberg/rollup-plugin-ts': ^1.3.8
       eslint: ^7.7.0
       jest: ^26.6.3
-      jest-environment-jsdom: ~26.6.2
-      jest-environment-jsdom-global: ~2.0.4
-      jest-standard-reporter: ~2.0.0
+      jest-environment-jsdom: ^26.6.2
+      jest-environment-jsdom-global: ^2.0.4
+      jest-standard-reporter: ^2.0.0
       jstimezonedetect: 1.0.7
       lodash: ^4.17.20
       moment-timezone: ^0.5.26
-      prettier: ^2.1.1
+      rollup: ^2.34.0
+      ts-jest: ^26.5.0
+      tslib: ^2.0.3
+      typescript: ^4.1.2
+  ../../plugins/browser-plugin-browser-features:
+    dependencies:
+      '@snowplow/browser-core': 'link:../../libraries/browser-core'
+      '@snowplow/tracker-core': 'link:../../libraries/tracker-core'
+      lodash: 4.17.20
+      tslib: 2.0.3
+    devDependencies:
+      '@types/jest': 26.0.20
+      '@types/jsdom': 16.2.6
+      '@types/lodash': 4.14.168
+      '@typescript-eslint/eslint-plugin': 4.11.0_1b9a0c47bb6bc72fe9ec08ec801e03a4
+      '@typescript-eslint/parser': 4.11.0_eslint@7.16.0+typescript@4.1.3
+      '@wessberg/rollup-plugin-ts': 1.3.8_rollup@2.35.1+typescript@4.1.3
+      eslint: 7.16.0
+      jest: 26.6.3
+      jest-environment-jsdom: 26.6.2
+      jest-environment-jsdom-global: 2.0.4_jest-environment-jsdom@26.6.2
+      jest-standard-reporter: 2.0.0
+      rollup: 2.35.1
+      ts-jest: 26.5.0_jest@26.6.3+typescript@4.1.3
+      typescript: 4.1.3
+    specifiers:
+      '@snowplow/browser-core': 'workspace:*'
+      '@snowplow/tracker-core': 'workspace:*'
+      '@types/jest': ^26.0.20
+      '@types/jsdom': ^16.2.6
+      '@types/lodash': ^4.14.168
+      '@typescript-eslint/eslint-plugin': ^4.9.0
+      '@typescript-eslint/parser': ^4.9.0
+      '@wessberg/rollup-plugin-ts': ^1.3.8
+      eslint: ^7.7.0
+      jest: ^26.6.3
+      jest-environment-jsdom: ^26.6.2
+      jest-environment-jsdom-global: ^2.0.4
+      jest-standard-reporter: ^2.0.0
+      lodash: ^4.17.20
       rollup: ^2.34.0
       ts-jest: ^26.5.0
       tslib: ^2.0.3
@@ -135,28 +165,24 @@ importers:
       tslib: 2.0.3
     devDependencies:
       '@types/jest': 26.0.20
-      '@types/node': 14.14.14
       '@typescript-eslint/eslint-plugin': 4.11.0_1b9a0c47bb6bc72fe9ec08ec801e03a4
       '@typescript-eslint/parser': 4.11.0_eslint@7.16.0+typescript@4.1.3
       '@wessberg/rollup-plugin-ts': 1.3.8_rollup@2.35.1+typescript@4.1.3
       eslint: 7.16.0
       jest: 26.6.3
       jest-standard-reporter: 2.0.0
-      prettier: 2.2.1
       rollup: 2.35.1
       ts-jest: 26.5.0_jest@26.6.3+typescript@4.1.3
       typescript: 4.1.3
     specifiers:
       '@snowplow/tracker-core': 'workspace:*'
       '@types/jest': ^26.0.20
-      '@types/node': ^14.6.0
       '@typescript-eslint/eslint-plugin': ^4.9.0
       '@typescript-eslint/parser': ^4.9.0
       '@wessberg/rollup-plugin-ts': ^1.3.8
       eslint: ^7.7.0
       jest: ^26.6.3
-      jest-standard-reporter: ~2.0.0
-      prettier: ^2.1.1
+      jest-standard-reporter: ^2.0.0
       rollup: ^2.34.0
       ts-jest: ^26.5.0
       tslib: ^2.0.3
@@ -168,14 +194,12 @@ importers:
       tslib: 2.0.3
     devDependencies:
       '@types/jest': 26.0.20
-      '@types/node': 14.14.14
       '@typescript-eslint/eslint-plugin': 4.11.0_1b9a0c47bb6bc72fe9ec08ec801e03a4
       '@typescript-eslint/parser': 4.11.0_eslint@7.16.0+typescript@4.1.3
       '@wessberg/rollup-plugin-ts': 1.3.8_rollup@2.35.1+typescript@4.1.3
       eslint: 7.16.0
       jest: 26.6.3
       jest-standard-reporter: 2.0.0
-      prettier: 2.2.1
       rollup: 2.35.1
       ts-jest: 26.5.0_jest@26.6.3+typescript@4.1.3
       typescript: 4.1.3
@@ -183,14 +207,12 @@ importers:
       '@snowplow/browser-core': 'workspace:*'
       '@snowplow/tracker-core': 'workspace:*'
       '@types/jest': ^26.0.20
-      '@types/node': ^14.6.0
       '@typescript-eslint/eslint-plugin': ^4.9.0
       '@typescript-eslint/parser': ^4.9.0
       '@wessberg/rollup-plugin-ts': ^1.3.8
       eslint: ^7.7.0
       jest: ^26.6.3
-      jest-standard-reporter: ~2.0.0
-      prettier: ^2.1.1
+      jest-standard-reporter: ^2.0.0
       rollup: ^2.34.0
       ts-jest: ^26.5.0
       tslib: ^2.0.3
@@ -204,14 +226,12 @@ importers:
     devDependencies:
       '@types/jest': 26.0.20
       '@types/lodash': 4.14.168
-      '@types/node': 14.14.14
       '@typescript-eslint/eslint-plugin': 4.11.0_1b9a0c47bb6bc72fe9ec08ec801e03a4
       '@typescript-eslint/parser': 4.11.0_eslint@7.16.0+typescript@4.1.3
       '@wessberg/rollup-plugin-ts': 1.3.8_rollup@2.35.1+typescript@4.1.3
       eslint: 7.16.0
       jest: 26.6.3
       jest-standard-reporter: 2.0.0
-      prettier: 2.2.1
       rollup: 2.35.1
       ts-jest: 26.5.0_jest@26.6.3+typescript@4.1.3
       typescript: 4.1.3
@@ -220,15 +240,13 @@ importers:
       '@snowplow/tracker-core': 'workspace:*'
       '@types/jest': ^26.0.20
       '@types/lodash': ^4.14.168
-      '@types/node': ^14.6.0
       '@typescript-eslint/eslint-plugin': ^4.9.0
       '@typescript-eslint/parser': ^4.9.0
       '@wessberg/rollup-plugin-ts': ^1.3.8
       eslint: ^7.7.0
       jest: ^26.6.3
-      jest-standard-reporter: ~2.0.0
+      jest-standard-reporter: ^2.0.0
       lodash: ^4.17.20
-      prettier: ^2.1.1
       rollup: ^2.34.0
       ts-jest: ^26.5.0
       tslib: ^2.0.3
@@ -242,14 +260,12 @@ importers:
     devDependencies:
       '@types/jest': 26.0.20
       '@types/lodash': 4.14.168
-      '@types/node': 14.14.14
       '@typescript-eslint/eslint-plugin': 4.11.0_1b9a0c47bb6bc72fe9ec08ec801e03a4
       '@typescript-eslint/parser': 4.11.0_eslint@7.16.0+typescript@4.1.3
       '@wessberg/rollup-plugin-ts': 1.3.8_rollup@2.35.1+typescript@4.1.3
       eslint: 7.16.0
       jest: 26.6.3
       jest-standard-reporter: 2.0.0
-      prettier: 2.2.1
       rollup: 2.35.1
       ts-jest: 26.5.0_jest@26.6.3+typescript@4.1.3
       typescript: 4.1.3
@@ -258,15 +274,13 @@ importers:
       '@snowplow/tracker-core': 'workspace:*'
       '@types/jest': ^26.0.20
       '@types/lodash': ^4.14.168
-      '@types/node': ^14.6.0
       '@typescript-eslint/eslint-plugin': ^4.9.0
       '@typescript-eslint/parser': ^4.9.0
       '@wessberg/rollup-plugin-ts': ^1.3.8
       eslint: ^7.7.0
       jest: ^26.6.3
-      jest-standard-reporter: ~2.0.0
+      jest-standard-reporter: ^2.0.0
       lodash: ^4.17.20
-      prettier: ^2.1.1
       rollup: ^2.34.0
       ts-jest: ^26.5.0
       tslib: ^2.0.3
@@ -278,14 +292,12 @@ importers:
       tslib: 2.0.3
     devDependencies:
       '@types/jest': 26.0.20
-      '@types/node': 14.14.14
       '@typescript-eslint/eslint-plugin': 4.11.0_1b9a0c47bb6bc72fe9ec08ec801e03a4
       '@typescript-eslint/parser': 4.11.0_eslint@7.16.0+typescript@4.1.3
       '@wessberg/rollup-plugin-ts': 1.3.8_rollup@2.35.1+typescript@4.1.3
       eslint: 7.16.0
       jest: 26.6.3
       jest-standard-reporter: 2.0.0
-      prettier: 2.2.1
       rollup: 2.35.1
       ts-jest: 26.5.0_jest@26.6.3+typescript@4.1.3
       typescript: 4.1.3
@@ -293,14 +305,12 @@ importers:
       '@snowplow/browser-core': 'workspace:*'
       '@snowplow/tracker-core': 'workspace:*'
       '@types/jest': ^26.0.20
-      '@types/node': ^14.6.0
       '@typescript-eslint/eslint-plugin': ^4.9.0
       '@typescript-eslint/parser': ^4.9.0
       '@wessberg/rollup-plugin-ts': ^1.3.8
       eslint: ^7.7.0
       jest: ^26.6.3
-      jest-standard-reporter: ~2.0.0
-      prettier: ^2.1.1
+      jest-standard-reporter: ^2.0.0
       rollup: ^2.34.0
       ts-jest: ^26.5.0
       tslib: ^2.0.3
@@ -312,14 +322,12 @@ importers:
       tslib: 2.0.3
     devDependencies:
       '@types/jest': 26.0.20
-      '@types/node': 14.14.14
       '@typescript-eslint/eslint-plugin': 4.11.0_1b9a0c47bb6bc72fe9ec08ec801e03a4
       '@typescript-eslint/parser': 4.11.0_eslint@7.16.0+typescript@4.1.3
       '@wessberg/rollup-plugin-ts': 1.3.8_rollup@2.35.1+typescript@4.1.3
       eslint: 7.16.0
       jest: 26.6.3
       jest-standard-reporter: 2.0.0
-      prettier: 2.2.1
       rollup: 2.35.1
       ts-jest: 26.5.0_jest@26.6.3+typescript@4.1.3
       typescript: 4.1.3
@@ -327,14 +335,12 @@ importers:
       '@snowplow/browser-core': 'workspace:*'
       '@snowplow/tracker-core': 'workspace:*'
       '@types/jest': ^26.0.20
-      '@types/node': ^14.6.0
       '@typescript-eslint/eslint-plugin': ^4.9.0
       '@typescript-eslint/parser': ^4.9.0
       '@wessberg/rollup-plugin-ts': ^1.3.8
       eslint: ^7.7.0
       jest: ^26.6.3
-      jest-standard-reporter: ~2.0.0
-      prettier: ^2.1.1
+      jest-standard-reporter: ^2.0.0
       rollup: ^2.34.0
       ts-jest: ^26.5.0
       tslib: ^2.0.3
@@ -348,14 +354,12 @@ importers:
     devDependencies:
       '@types/jest': 26.0.20
       '@types/lodash': 4.14.168
-      '@types/node': 14.14.14
       '@typescript-eslint/eslint-plugin': 4.11.0_1b9a0c47bb6bc72fe9ec08ec801e03a4
       '@typescript-eslint/parser': 4.11.0_eslint@7.16.0+typescript@4.1.3
       '@wessberg/rollup-plugin-ts': 1.3.8_rollup@2.35.1+typescript@4.1.3
       eslint: 7.16.0
       jest: 26.6.3
       jest-standard-reporter: 2.0.0
-      prettier: 2.2.1
       rollup: 2.35.1
       ts-jest: 26.5.0_jest@26.6.3+typescript@4.1.3
       typescript: 4.1.3
@@ -364,15 +368,13 @@ importers:
       '@snowplow/tracker-core': 'workspace:*'
       '@types/jest': ^26.0.20
       '@types/lodash': ^4.14.168
-      '@types/node': ^14.6.0
       '@typescript-eslint/eslint-plugin': ^4.9.0
       '@typescript-eslint/parser': ^4.9.0
       '@wessberg/rollup-plugin-ts': ^1.3.8
       eslint: ^7.7.0
       jest: ^26.6.3
-      jest-standard-reporter: ~2.0.0
+      jest-standard-reporter: ^2.0.0
       lodash: ^4.17.20
-      prettier: ^2.1.1
       rollup: ^2.34.0
       ts-jest: ^26.5.0
       tslib: ^2.0.3
@@ -386,14 +388,12 @@ importers:
     devDependencies:
       '@types/jest': 26.0.20
       '@types/lodash': 4.14.168
-      '@types/node': 14.14.14
       '@typescript-eslint/eslint-plugin': 4.11.0_1b9a0c47bb6bc72fe9ec08ec801e03a4
       '@typescript-eslint/parser': 4.11.0_eslint@7.16.0+typescript@4.1.3
       '@wessberg/rollup-plugin-ts': 1.3.8_rollup@2.35.1+typescript@4.1.3
       eslint: 7.16.0
       jest: 26.6.3
       jest-standard-reporter: 2.0.0
-      prettier: 2.2.1
       rollup: 2.35.1
       ts-jest: 26.5.0_jest@26.6.3+typescript@4.1.3
       typescript: 4.1.3
@@ -402,15 +402,13 @@ importers:
       '@snowplow/tracker-core': 'workspace:*'
       '@types/jest': ^26.0.20
       '@types/lodash': ^4.14.168
-      '@types/node': ^14.6.0
       '@typescript-eslint/eslint-plugin': ^4.9.0
       '@typescript-eslint/parser': ^4.9.0
       '@wessberg/rollup-plugin-ts': ^1.3.8
       eslint: ^7.7.0
       jest: ^26.6.3
-      jest-standard-reporter: ~2.0.0
+      jest-standard-reporter: ^2.0.0
       lodash: ^4.17.20
-      prettier: ^2.1.1
       rollup: ^2.34.0
       ts-jest: ^26.5.0
       tslib: ^2.0.3
@@ -424,14 +422,12 @@ importers:
     devDependencies:
       '@types/jest': 26.0.20
       '@types/lodash': 4.14.168
-      '@types/node': 14.14.14
       '@typescript-eslint/eslint-plugin': 4.11.0_1b9a0c47bb6bc72fe9ec08ec801e03a4
       '@typescript-eslint/parser': 4.11.0_eslint@7.16.0+typescript@4.1.3
       '@wessberg/rollup-plugin-ts': 1.3.8_rollup@2.35.1+typescript@4.1.3
       eslint: 7.16.0
       jest: 26.6.3
       jest-standard-reporter: 2.0.0
-      prettier: 2.2.1
       rollup: 2.35.1
       ts-jest: 26.5.0_jest@26.6.3+typescript@4.1.3
       typescript: 4.1.3
@@ -440,15 +436,13 @@ importers:
       '@snowplow/tracker-core': 'workspace:*'
       '@types/jest': ^26.0.20
       '@types/lodash': ^4.14.168
-      '@types/node': ^14.6.0
       '@typescript-eslint/eslint-plugin': ^4.9.0
       '@typescript-eslint/parser': ^4.9.0
       '@wessberg/rollup-plugin-ts': ^1.3.8
       eslint: ^7.7.0
       jest: ^26.6.3
-      jest-standard-reporter: ~2.0.0
+      jest-standard-reporter: ^2.0.0
       lodash: ^4.17.20
-      prettier: ^2.1.1
       rollup: ^2.34.0
       ts-jest: ^26.5.0
       tslib: ^2.0.3
@@ -459,28 +453,24 @@ importers:
       tslib: 2.0.3
     devDependencies:
       '@types/jest': 26.0.20
-      '@types/node': 14.14.14
       '@typescript-eslint/eslint-plugin': 4.11.0_1b9a0c47bb6bc72fe9ec08ec801e03a4
       '@typescript-eslint/parser': 4.11.0_eslint@7.16.0+typescript@4.1.3
       '@wessberg/rollup-plugin-ts': 1.3.8_rollup@2.35.1+typescript@4.1.3
       eslint: 7.16.0
       jest: 26.6.3
       jest-standard-reporter: 2.0.0
-      prettier: 2.2.1
       rollup: 2.35.1
       ts-jest: 26.5.0_jest@26.6.3+typescript@4.1.3
       typescript: 4.1.3
     specifiers:
       '@snowplow/tracker-core': 'workspace:*'
       '@types/jest': ^26.0.20
-      '@types/node': ^14.6.0
       '@typescript-eslint/eslint-plugin': ^4.9.0
       '@typescript-eslint/parser': ^4.9.0
       '@wessberg/rollup-plugin-ts': ^1.3.8
       eslint: ^7.7.0
       jest: ^26.6.3
-      jest-standard-reporter: ~2.0.0
-      prettier: ^2.1.1
+      jest-standard-reporter: ^2.0.0
       rollup: ^2.34.0
       ts-jest: ^26.5.0
       tslib: ^2.0.3
@@ -492,14 +482,12 @@ importers:
       tslib: 2.0.3
     devDependencies:
       '@types/jest': 26.0.20
-      '@types/node': 14.14.14
       '@typescript-eslint/eslint-plugin': 4.11.0_1b9a0c47bb6bc72fe9ec08ec801e03a4
       '@typescript-eslint/parser': 4.11.0_eslint@7.16.0+typescript@4.1.3
       '@wessberg/rollup-plugin-ts': 1.3.8_rollup@2.35.1+typescript@4.1.3
       eslint: 7.16.0
       jest: 26.6.3
       jest-standard-reporter: 2.0.0
-      prettier: 2.2.1
       rollup: 2.35.1
       ts-jest: 26.5.0_jest@26.6.3+typescript@4.1.3
       typescript: 4.1.3
@@ -507,14 +495,54 @@ importers:
       '@snowplow/browser-core': 'workspace:*'
       '@snowplow/tracker-core': 'workspace:*'
       '@types/jest': ^26.0.20
-      '@types/node': ^14.6.0
       '@typescript-eslint/eslint-plugin': ^4.9.0
       '@typescript-eslint/parser': ^4.9.0
       '@wessberg/rollup-plugin-ts': ^1.3.8
       eslint: ^7.7.0
       jest: ^26.6.3
-      jest-standard-reporter: ~2.0.0
-      prettier: ^2.1.1
+      jest-standard-reporter: ^2.0.0
+      rollup: ^2.34.0
+      ts-jest: ^26.5.0
+      tslib: ^2.0.3
+      typescript: ^4.1.2
+  ../../plugins/browser-plugin-timezone:
+    dependencies:
+      '@snowplow/browser-core': 'link:../../libraries/browser-core'
+      '@snowplow/tracker-core': 'link:../../libraries/tracker-core'
+      jstimezonedetect: 1.0.7
+      lodash: 4.17.20
+      tslib: 2.0.3
+    devDependencies:
+      '@types/jest': 26.0.20
+      '@types/jsdom': 16.2.6
+      '@types/jstimezonedetect': 1.0.3
+      '@types/lodash': 4.14.168
+      '@typescript-eslint/eslint-plugin': 4.11.0_1b9a0c47bb6bc72fe9ec08ec801e03a4
+      '@typescript-eslint/parser': 4.11.0_eslint@7.16.0+typescript@4.1.3
+      '@wessberg/rollup-plugin-ts': 1.3.8_rollup@2.35.1+typescript@4.1.3
+      eslint: 7.16.0
+      jest: 26.6.3
+      jest-standard-reporter: 2.0.0
+      moment-timezone: 0.5.32
+      rollup: 2.35.1
+      ts-jest: 26.5.0_jest@26.6.3+typescript@4.1.3
+      typescript: 4.1.3
+    specifiers:
+      '@snowplow/browser-core': 'workspace:*'
+      '@snowplow/tracker-core': 'workspace:*'
+      '@types/jest': ^26.0.20
+      '@types/jsdom': ^16.2.6
+      '@types/jstimezonedetect': ~1.0.3
+      '@types/lodash': ^4.14.168
+      '@typescript-eslint/eslint-plugin': ^4.9.0
+      '@typescript-eslint/parser': ^4.9.0
+      '@wessberg/rollup-plugin-ts': ^1.3.8
+      eslint: ^7.7.0
+      jest: ^26.6.3
+      jest-standard-reporter: ^2.0.0
+      jstimezonedetect: 1.0.7
+      lodash: ^4.17.20
+      moment-timezone: ^0.5.26
       rollup: ^2.34.0
       ts-jest: ^26.5.0
       tslib: ^2.0.3
@@ -522,7 +550,7 @@ importers:
   ../../trackers/browser-tracker:
     dependencies:
       '@snowplow/browser-core': 'link:../../libraries/browser-core'
-      '@snowplow/browser-detectors': 'link:../../plugins/browser-detectors'
+      '@snowplow/browser-plugin-link-click-tracking': 'link:../../plugins/browser-plugin-link-click-tracking'
       '@snowplow/tracker-core': 'link:../../libraries/tracker-core'
       lodash: 4.17.20
       sha1: 1.1.1
@@ -534,6 +562,7 @@ importers:
       '@rollup/plugin-json': 4.1.0_rollup@2.35.1
       '@rollup/plugin-node-resolve': 11.0.1_rollup@2.35.1
       '@types/jest': 26.0.20
+      '@types/jsdom': 16.2.6
       '@types/lodash': 4.14.168
       '@types/sha1': 1.1.2
       '@types/uuid': 3.4.9
@@ -542,8 +571,9 @@ importers:
       '@wessberg/rollup-plugin-ts': 1.3.8_rollup@2.35.1+typescript@4.1.3
       eslint: 7.16.0
       jest: 26.6.3
+      jest-environment-jsdom: 26.6.2
+      jest-environment-jsdom-global: 2.0.4_jest-environment-jsdom@26.6.2
       jest-standard-reporter: 2.0.0
-      prettier: 2.2.1
       rollup: 2.35.1
       rollup-plugin-banner: 0.2.1
       rollup-plugin-cleanup: 3.2.1_rollup@2.35.1
@@ -555,9 +585,10 @@ importers:
       '@rollup/plugin-json': ^4.1.0
       '@rollup/plugin-node-resolve': ^11.0.0
       '@snowplow/browser-core': 'workspace:*'
-      '@snowplow/browser-detectors': 'workspace:*'
+      '@snowplow/browser-plugin-link-click-tracking': 'workspace:*'
       '@snowplow/tracker-core': 'workspace:*'
       '@types/jest': ^26.0.20
+      '@types/jsdom': ^16.2.6
       '@types/lodash': ^4.14.168
       '@types/sha1': ^1.1.2
       '@types/uuid': ^3.4.6
@@ -566,9 +597,10 @@ importers:
       '@wessberg/rollup-plugin-ts': ^1.3.8
       eslint: ^7.7.0
       jest: ^26.6.3
-      jest-standard-reporter: ~2.0.0
+      jest-environment-jsdom: ^26.6.2
+      jest-environment-jsdom-global: ^2.0.4
+      jest-standard-reporter: ^2.0.0
       lodash: ^4.17.20
-      prettier: ^2.1.1
       rollup: ^2.34.0
       rollup-plugin-banner: ^0.2.1
       rollup-plugin-cleanup: ^3.2.1
@@ -580,7 +612,7 @@ importers:
   ../../trackers/javascript-tracker:
     dependencies:
       '@snowplow/browser-core': 'link:../../libraries/browser-core'
-      '@snowplow/browser-detectors': 'link:../../plugins/browser-detectors'
+      '@snowplow/browser-plugin-browser-features': 'link:../../plugins/browser-plugin-browser-features'
       '@snowplow/browser-plugin-client-hints': 'link:../../plugins/browser-plugin-client-hints'
       '@snowplow/browser-plugin-error-tracking': 'link:../../plugins/browser-plugin-error-tracking'
       '@snowplow/browser-plugin-form-tracking': 'link:../../plugins/browser-plugin-form-tracking'
@@ -592,6 +624,7 @@ importers:
       '@snowplow/browser-plugin-optimizely-x': 'link:../../plugins/browser-plugin-optimizely-x'
       '@snowplow/browser-plugin-parrable': 'link:../../plugins/browser-plugin-parrable'
       '@snowplow/browser-plugin-performance-timing': 'link:../../plugins/browser-plugin-performance-timing'
+      '@snowplow/browser-plugin-timezone': 'link:../../plugins/browser-plugin-timezone'
       '@snowplow/browser-tracker': 'link:../browser-tracker'
       '@snowplow/tracker-core': 'link:../../libraries/tracker-core'
       lodash: 4.17.20
@@ -619,7 +652,6 @@ importers:
       jest: 26.6.3_ts-node@9.1.1
       jest-standard-reporter: 2.0.0
       npm-run-all: 4.1.5
-      prettier: 2.2.1
       rollup: 2.35.1
       rollup-plugin-banner: 0.2.1
       rollup-plugin-cleanup: 3.2.1_rollup@2.35.1
@@ -636,7 +668,7 @@ importers:
       '@rollup/plugin-json': ^4.1.0
       '@rollup/plugin-node-resolve': ^11.0.0
       '@snowplow/browser-core': 'workspace:*'
-      '@snowplow/browser-detectors': 'workspace:*'
+      '@snowplow/browser-plugin-browser-features': 'workspace:*'
       '@snowplow/browser-plugin-client-hints': 'workspace:*'
       '@snowplow/browser-plugin-error-tracking': 'workspace:*'
       '@snowplow/browser-plugin-form-tracking': 'workspace:*'
@@ -648,12 +680,13 @@ importers:
       '@snowplow/browser-plugin-optimizely-x': 'workspace:*'
       '@snowplow/browser-plugin-parrable': 'workspace:*'
       '@snowplow/browser-plugin-performance-timing': 'workspace:*'
+      '@snowplow/browser-plugin-timezone': 'workspace:*'
       '@snowplow/browser-tracker': 'workspace:*'
       '@snowplow/tracker-core': 'workspace:*'
       '@types/dockerode': ^3.2.2
       '@types/jest': ^26.0.20
       '@types/lodash': ^4.14.168
-      '@types/node': ^14.14.25
+      '@types/node': ^14.6.0
       '@wdio/cli': ^6.12.1
       '@wdio/jasmine-framework': ^6.11.0
       '@wdio/local-runner': ^6.12.1
@@ -666,10 +699,9 @@ importers:
       dockerode: ^3.2.1
       gulp: ^4.0.2
       jest: ^26.6.3
-      jest-standard-reporter: ~2.0.0
+      jest-standard-reporter: ^2.0.0
       lodash: ^4.17.20
       npm-run-all: ^4.1.5
-      prettier: ^2.1.1
       rollup: ^2.34.0
       rollup-plugin-banner: ^0.2.1
       rollup-plugin-cleanup: ^3.2.1
@@ -1710,7 +1742,7 @@ packages:
   /@jest/console/26.6.2:
     dependencies:
       '@jest/types': 26.6.2
-      '@types/node': 14.14.14
+      '@types/node': 14.14.25
       chalk: 4.1.0
       jest-message-util: 26.6.2
       jest-util: 26.6.2
@@ -1727,7 +1759,7 @@ packages:
       '@jest/test-result': 26.6.2
       '@jest/transform': 26.6.2
       '@jest/types': 26.6.2
-      '@types/node': 14.14.14
+      '@types/node': 14.14.25
       ansi-escapes: 4.3.1
       chalk: 4.1.0
       exit: 0.1.2
@@ -1764,7 +1796,7 @@ packages:
       '@jest/test-result': 26.6.2
       '@jest/transform': 26.6.2
       '@jest/types': 26.6.2
-      '@types/node': 14.14.14
+      '@types/node': 14.14.25
       ansi-escapes: 4.3.1
       chalk: 4.1.0
       exit: 0.1.2
@@ -1798,7 +1830,7 @@ packages:
     dependencies:
       '@jest/fake-timers': 26.6.2
       '@jest/types': 26.6.2
-      '@types/node': 14.14.14
+      '@types/node': 14.14.25
       jest-mock: 26.6.2
     dev: true
     engines:
@@ -1809,7 +1841,7 @@ packages:
     dependencies:
       '@jest/types': 26.6.2
       '@sinonjs/fake-timers': 6.0.1
-      '@types/node': 14.14.14
+      '@types/node': 14.14.25
       jest-message-util: 26.6.2
       jest-mock: 26.6.2
       jest-util: 26.6.2
@@ -1936,7 +1968,7 @@ packages:
     dependencies:
       '@types/istanbul-lib-coverage': 2.0.3
       '@types/istanbul-reports': 3.0.0
-      '@types/node': 14.14.14
+      '@types/node': 14.14.25
       '@types/yargs': 15.0.12
       chalk: 4.1.0
     dev: true
@@ -2266,7 +2298,7 @@ packages:
       integrity: sha512-wr3t7wIW1c0A2BIJtdVp4EflriVaVVAsCAIHVzzh8B+GiFv9X1xeJjCs4upRXtzp7kQ6lP5xvskjoD4awJ1ZeA==
   /@types/graceful-fs/4.1.4:
     dependencies:
-      '@types/node': 14.14.14
+      '@types/node': 14.14.25
     dev: true
     resolution:
       integrity: sha512-mWA/4zFQhfvOA8zWkXobwJvBD7vzcxgrOQ0J5CH1votGqdq9m7+FwtGaqyCZqC3NyyBkc9z4m+iry4LlqcMWJg==
@@ -7568,7 +7600,7 @@ packages:
       '@jest/environment': 26.6.2
       '@jest/fake-timers': 26.6.2
       '@jest/types': 26.6.2
-      '@types/node': 14.14.14
+      '@types/node': 14.14.25
       jest-mock: 26.6.2
       jest-util: 26.6.2
       jsdom: 16.4.0
@@ -7582,7 +7614,7 @@ packages:
       '@jest/environment': 26.6.2
       '@jest/fake-timers': 26.6.2
       '@jest/types': 26.6.2
-      '@types/node': 14.14.14
+      '@types/node': 14.14.25
       jest-mock: 26.6.2
       jest-util: 26.6.2
     dev: true
@@ -7600,7 +7632,7 @@ packages:
     dependencies:
       '@jest/types': 26.6.2
       '@types/graceful-fs': 4.1.4
-      '@types/node': 14.14.14
+      '@types/node': 14.14.25
       anymatch: 3.1.1
       fb-watchman: 2.0.1
       graceful-fs: 4.2.4
@@ -7625,7 +7657,7 @@ packages:
       '@jest/source-map': 26.6.2
       '@jest/test-result': 26.6.2
       '@jest/types': 26.6.2
-      '@types/node': 14.14.14
+      '@types/node': 14.14.25
       chalk: 4.1.0
       co: 4.6.0
       expect: 26.6.2
@@ -7684,7 +7716,7 @@ packages:
   /jest-mock/26.6.2:
     dependencies:
       '@jest/types': 26.6.2
-      '@types/node': 14.14.14
+      '@types/node': 14.14.25
     dev: true
     engines:
       node: '>= 10.14.2'
@@ -7742,7 +7774,7 @@ packages:
       '@jest/environment': 26.6.2
       '@jest/test-result': 26.6.2
       '@jest/types': 26.6.2
-      '@types/node': 14.14.14
+      '@types/node': 14.14.25
       chalk: 4.1.0
       emittery: 0.7.2
       exit: 0.1.2
@@ -7771,7 +7803,7 @@ packages:
       '@jest/environment': 26.6.2
       '@jest/test-result': 26.6.2
       '@jest/types': 26.6.2
-      '@types/node': 14.14.14
+      '@types/node': 14.14.25
       chalk: 4.1.0
       emittery: 0.7.2
       exit: 0.1.2
@@ -7833,7 +7865,7 @@ packages:
       integrity: sha512-lrzyR3N8sacTAMeonbqpnSka1dHNux2uk0qqDXVkMv2c/A3wYnvQ4EXuI013Y6+gSKSCxdaczvf4HF0mVXHRdw==
   /jest-serializer/26.6.2:
     dependencies:
-      '@types/node': 14.14.14
+      '@types/node': 14.14.25
       graceful-fs: 4.2.4
     dev: true
     engines:
@@ -7877,7 +7909,7 @@ packages:
   /jest-util/26.6.2:
     dependencies:
       '@jest/types': 26.6.2
-      '@types/node': 14.14.14
+      '@types/node': 14.14.25
       chalk: 4.1.0
       graceful-fs: 4.2.4
       is-ci: 2.0.0
@@ -7904,7 +7936,7 @@ packages:
     dependencies:
       '@jest/test-result': 26.6.2
       '@jest/types': 26.6.2
-      '@types/node': 14.14.14
+      '@types/node': 14.14.25
       ansi-escapes: 4.3.1
       chalk: 4.1.0
       jest-util: 26.6.2
@@ -7916,7 +7948,7 @@ packages:
       integrity: sha512-WKJob0P/Em2csiVthsI68p6aGKTIcsfjH9Gsx1f0A3Italz43e3ho0geSAVsmj09RWOELP1AZ/DXyJgOgDKxXQ==
   /jest-worker/26.6.2:
     dependencies:
-      '@types/node': 14.14.14
+      '@types/node': 14.14.25
       merge-stream: 2.0.0
       supports-color: 7.2.0
     dev: true
@@ -9758,13 +9790,6 @@ packages:
       node: '>=4'
     resolution:
       integrity: sha1-6SQ0v6XqjBn0HN/UAddBo8gZ2Jc=
-  /prettier/2.2.1:
-    dev: true
-    engines:
-      node: '>=10.13.0'
-    hasBin: true
-    resolution:
-      integrity: sha512-PqyhM2yCjg/oKkFPtTGUojv7gnZAoG80ttl45O6x2Ug/rMJw4wcc9k6aaf2hibP7BGVCCM33gZoGjyvt9mm16Q==
   /pretty-format/26.6.2:
     dependencies:
       '@jest/types': 26.6.2

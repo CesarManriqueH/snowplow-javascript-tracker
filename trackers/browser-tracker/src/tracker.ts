@@ -108,7 +108,7 @@ type AnonymousTrackingOptions = boolean & {
   anonymousTracking: { withSessionTracking?: boolean; withServerAnonymisation?: boolean };
 };
 
-export type TrackerApi = {
+export interface TrackerApi {
   [key: string]: Function;
 
   /**
@@ -800,7 +800,7 @@ export type TrackerApi = {
    * Clears all cookies and local storage containing user and session identifiers
    */
   clearUserData: () => void;
-};
+}
 
 /**
  * Snowplow Tracker class
@@ -902,7 +902,7 @@ export function Tracker(
     browserLanguage = (navigatorAlias as any).userLanguage || navigatorAlias.language,
     documentCharset = documentAlias.characterSet || documentAlias.charset,
     // Current URL and Referrer URL
-    locationArray = fixupUrl(documentAlias.domain, windowAlias.location.href, getReferrer()),
+    locationArray = fixupUrl(windowAlias.location.hostname, windowAlias.location.href, getReferrer()),
     domainAlias = fixupDomain(locationArray[0]),
     locationHrefAlias = locationArray[1],
     configReferrerUrl = locationArray[2],
@@ -1023,8 +1023,7 @@ export function Tracker(
       installed: false, // Guard against installing the activity tracker more than once per Tracker instance
       configurations: {},
     },
-    apiPlugins = argmap.apiPlugins || [],
-    detectors = argmap.detectors || {};
+    apiPlugins = argmap.apiPlugins || [];
 
   if (argmap.hasOwnProperty('discoverRootDomain') && argmap.discoverRootDomain) {
     configCookieDomain = findRootDomain(configCookieSameSite, configCookieSecure);
@@ -1041,14 +1040,11 @@ export function Tracker(
   core.addPayloadPair('res', screenAlias.width + 'x' + screenAlias.height);
   core.addPayloadPair('cd', screenAlias.colorDepth);
 
-  if (detectors.timezone) detectors.timezone(core);
-  if (detectors.browserFeatures) detectors.browserFeatures(core);
-
   /**
    * Recalculate the domain, URL, and referrer
    */
   function refreshUrl() {
-    locationArray = fixupUrl(documentAlias.domain, windowAlias.location.href, getReferrer());
+    locationArray = fixupUrl(windowAlias.location.hostname, windowAlias.location.href, getReferrer());
 
     // If this is a single-page app and the page URL has changed, then:
     //   - if the new URL's querystring contains a "refer(r)er" parameter, use it as the referrer
@@ -2954,10 +2950,13 @@ export function Tracker(
     if (current.initialise) {
       current.initialise(core, trackerId, mutSnowplowState);
     }
-    return {
-      ...prev,
-      ...current.apiMethods,
-    };
+    if (current.apiMethods) {
+      return {
+        ...prev,
+        ...current.apiMethods,
+      };
+    }
+    return prev;
   }, apiMethods) as TrackerApi;
   safeMethods = productionize(combinedApiMethods);
 

@@ -10,13 +10,6 @@ export const plugins = {
   linkClickTracking: true,
   formTracking: true,
   errorTracking: true,
-};
-
-export const detectors = {
-  cookie: true,
-  screen: true,
-  window: true,
-  document: true,
-  timezone: true,
   browserFeatures: true,
+  timezone: true,
 };

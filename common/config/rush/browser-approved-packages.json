@@ -55,6 +55,10 @@
       "allowedCategories": [ "plugins", "trackers" ]
     },
     {
+      "name": "@snowplow/browser-plugin-browser-features",
+      "allowedCategories": [ "trackers" ]
+    },
+    {
       "name": "@snowplow/browser-plugin-client-hints",
       "allowedCategories": [ "trackers" ]
     },
@@ -103,6 +107,10 @@
       "allowedCategories": [ "trackers" ]
     },
     {
+      "name": "@snowplow/browser-plugin-timezone",
+      "allowedCategories": [ "trackers" ]
+    },
+    {
       "name": "@snowplow/browser-tracker",
       "allowedCategories": [ "trackers" ]
     },
@@ -128,7 +136,7 @@
     },
     {
       "name": "@types/jsdom",
-      "allowedCategories": [ "libraries", "plugins" ]
+      "allowedCategories": [ "libraries", "plugins", "trackers" ]
     },
     {
       "name": "@types/jstimezonedetect",
@@ -232,11 +240,11 @@
     },
     {
       "name": "jest-environment-jsdom",
-      "allowedCategories": [ "libraries", "plugins" ]
+      "allowedCategories": [ "libraries", "plugins", "trackers" ]
     },
     {
       "name": "jest-environment-jsdom-global",
-      "allowedCategories": [ "libraries", "plugins" ]
+      "allowedCategories": [ "libraries", "plugins", "trackers" ]
     },
     {
       "name": "jest-standard-reporter",

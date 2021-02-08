@@ -1,7 +1,7 @@
 {
-  "name": "@snowplow/browser-detectors",
+  "name": "@snowplow/browser-plugin-browser-features",
   "version": "1.0.0",
-  "description": "Contains the various detectors to be used with the '@snowplow/browser-tracker'",
+  "description": "Automatically attaches browser features to events",
   "license": "Apache-2.0",
   "author": "Paul Boocock",
   "main": "dist/cjs/index.js",
@@ -18,16 +18,13 @@
   "dependencies": {
     "@snowplow/browser-core": "workspace:*",
     "@snowplow/tracker-core": "workspace:*",
-    "jstimezonedetect": "1.0.7",
     "lodash": "^4.17.20",
     "tslib": "^2.0.3"
   },
   "devDependencies": {
     "@types/jest": "^26.0.20",
     "@types/jsdom": "^16.2.6",
-    "@types/jstimezonedetect": "~1.0.3",
     "@types/lodash": "^4.14.168",
-    "@types/node": "^14.6.0",
     "@typescript-eslint/eslint-plugin": "^4.9.0",
     "@typescript-eslint/parser": "^4.9.0",
     "@wessberg/rollup-plugin-ts": "^1.3.8",
@@ -36,8 +33,6 @@
     "jest-environment-jsdom": "^26.6.2",
     "jest-environment-jsdom-global": "^2.0.4",
     "jest-standard-reporter": "^2.0.0",
-    "moment-timezone": "^0.5.26",
-    "prettier": "^2.1.1",
     "rollup": "^2.34.0",
     "ts-jest": "^26.5.0",
     "typescript": "^4.1.2"

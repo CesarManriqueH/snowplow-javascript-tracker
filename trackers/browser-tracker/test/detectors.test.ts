@@ -31,18 +31,9 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-import { trackerCore } from '@snowplow/tracker-core';
+// import { trackerCore } from '@snowplow/tracker-core';
 import { JSDOM } from 'jsdom';
-// import F from 'lodash/fp';
-import { tz } from 'moment-timezone';
-import {
-  DetectBrowserFeatures,
-  DetectCookie,
-  DetectDocument,
-  DetectScreen,
-  DetectTimezone,
-  DetectWindow,
-} from '../src/index';
+import { newTracker } from '../src/snowplow';
 
 declare var jsdom: JSDOM;
 
@@ -52,19 +43,11 @@ describe('Detectors', () => {
     Object.defineProperty(jsdom.window.HTMLHtmlElement.prototype, 'clientHeight', { value: 768 });
     Object.defineProperty(jsdom.window.screen, 'width', { value: 1024 });
     Object.defineProperty(jsdom.window.screen, 'height', { value: 768 });
-    Object.defineProperty(jsdom.window.navigator, 'mimeTypes', {
-      value: {
-        'application/pdf': { enabledPlugin: true },
-        length: 1,
-      },
-    });
   });
 
-  it('Return a value for document and viewport dimensions', (done) => {
-    const core = trackerCore(false, (payloadBuilder) => {
-      DetectWindow()(payloadBuilder);
-      const payload = payloadBuilder.build();
-
+  it('Return a value for dimensions', (done) => {
+    const tracker = newTracker('sp', '', {});
+    tracker.trackPageView(null, null, null, null, (payload) => {
       const [reportedDocumentWidth, reportedDocumentHeight] = (payload['ds'] as string).split('x');
       expect(+reportedDocumentWidth).toBeGreaterThan(1);
       expect(+reportedDocumentHeight).toBeGreaterThan(1);
@@ -72,63 +55,23 @@ describe('Detectors', () => {
       const [reportedViewportWidth, reportedViewportHeight] = (payload['vp'] as string).split('x');
       expect(+reportedViewportWidth).toBe(1024);
       expect(+reportedViewportHeight).toBe(768);
-      done();
-    });
-    core.trackLinkClick('https://example.com');
-  });
 
-  it('Return a value for language and charset', (done) => {
-    const core = trackerCore(false, (payloadBuilder) => {
-      const payload = payloadBuilder.build();
-      expect(payload['cs']).toBe('UTF-8');
-      expect(payload['lang']).toBe('en-US');
-      done();
-    });
-    DetectDocument()(core);
-    core.trackLinkClick('https://example.com');
-  });
-
-  it('Return a value for whether cookies are enabled', (done) => {
-    const core = trackerCore(false, (payloadBuilder) => {
-      const payload = payloadBuilder.build();
-      expect(payload['cookie']).toBe('1');
-      done();
-    });
-    DetectCookie()(core);
-    core.trackLinkClick('https://example.com');
-  });
-
-  it('Return a value for screen resolution and colour depth', (done) => {
-    const core = trackerCore(false, (payloadBuilder) => {
-      const payload = payloadBuilder.build();
       const [reportedWidth, reportedHeight] = (payload['res'] as string).split('x');
       expect(+reportedWidth).toBe(1024);
       expect(+reportedHeight).toBe(768);
+
+      done();
+    });
+  });
+
+  it('Return a value for language, charset, color depth and cookies', (done) => {
+    const tracker = newTracker('sp', '', {});
+    tracker.trackPageView(null, null, null, null, (payload) => {
+      expect(payload['lang']).toBe('en-US');
+      expect(payload['cs']).toBe('UTF-8');
       expect(payload['cd']).toBe(24);
+      expect(payload['cookie']).toBe('1');
       done();
     });
-    DetectScreen()(core);
-    core.trackLinkClick('https://example.com');
-  });
-
-  it('Return a value for the current timezone', (done) => {
-    const core = trackerCore(false, (payloadBuilder) => {
-      const payload = payloadBuilder.build();
-      expect(tz.names().includes(payload['tz'] as string)).toBeTruthy();
-      done();
-    });
-    DetectTimezone()(core);
-    core.trackLinkClick('https://example.com');
-  });
-
-  it('Return values for available mimeTypes', (done) => {
-    const core = trackerCore(false, (payloadBuilder) => {
-      const payload = payloadBuilder.build();
-      expect(payload['f_pdf']).toBe('1');
-      expect(payload['f_ag']).toBe('0');
-      done();
-    });
-    DetectBrowserFeatures()(core);
-    core.trackLinkClick('https://example.com');
   });
 });

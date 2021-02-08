@@ -9,8 +9,9 @@ import { GaCookiesPlugin } from '@snowplow/browser-plugin-ga-cookies';
 import { LinkClickTrackingPlugin } from '@snowplow/browser-plugin-link-click-tracking';
 import { FormTrackingPlugin } from '@snowplow/browser-plugin-form-tracking';
 import { ErrorTrackingPlugin } from '@snowplow/browser-plugin-error-tracking';
-import { DetectTimezone, DetectBrowserFeatures } from '@snowplow/browser-detectors';
-import { plugins, detectors } from '../tracker.config';
+import { BrowserFeaturesPlugin } from '@snowplow/browser-plugin-browser-features';
+import { TimezonePlugin } from '@snowplow/browser-plugin-timezone';
+import { plugins } from '../tracker.config';
 
 export function Plugins(argmap: any) {
   const {
@@ -100,23 +101,16 @@ export function Plugins(argmap: any) {
     apiPlugins.push(ErrorTrackingPlugin());
   }
 
+  if (plugins.browserFeatures) {
+    apiPlugins.push(BrowserFeaturesPlugin());
+  }
+
+  if (plugins.timezone) {
+    apiPlugins.push(TimezonePlugin());
+  }
+
   return {
     contextPlugins: contextPlugins,
     apiPlugins: apiPlugins,
   };
-}
-
-export function Detectors(argmap: any) {
-  const { timezone, browserFeatures } = argmap?.detectors ?? {},
-    selectedDetectors: any = {};
-
-  if (detectors.timezone && (timezone ?? true)) {
-    selectedDetectors.timezone = DetectTimezone();
-  }
-
-  if (detectors.browserFeatures && (browserFeatures ?? true)) {
-    selectedDetectors.browserFeatures = DetectBrowserFeatures();
-  }
-
-  return selectedDetectors;
 }

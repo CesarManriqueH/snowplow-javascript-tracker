@@ -13,7 +13,7 @@ import {
 } from '@snowplow/browser-core';
 import { Core, SelfDescribingJson, Timestamp } from '@snowplow/tracker-core';
 
-interface LinkClickMethods extends ApiMethods {
+export interface LinkClickMethods extends ApiMethods {
   enableLinkClickTracking: (
     criterion: FilterCriterion<HTMLElement>,
     pseudoClicks: boolean,
@@ -32,7 +32,7 @@ interface LinkClickMethods extends ApiMethods {
   ) => void;
 }
 
-const LinkClickTrackingPlugin = (): BrowserApiPlugin<LinkClickMethods> => {
+export const LinkClickTrackingPlugin = (): BrowserApiPlugin<LinkClickMethods> => {
   let _core: Core,
     _trackerId: string,
     _state: SharedState,
@@ -254,5 +254,3 @@ const LinkClickTrackingPlugin = (): BrowserApiPlugin<LinkClickMethods> => {
     },
   };
 };
-
-export { LinkClickTrackingPlugin };
