@@ -36,6 +36,11 @@ import http from 'http';
 import Docker from 'dockerode';
 import { Writable } from 'stream';
 
+export interface DockerWrapper {
+  url: string;
+  container: Docker.Container;
+}
+
 const docker = new Docker();
 
 export const start = () => {
@@ -49,7 +54,7 @@ export const start = () => {
       Cmd: ['--collector-config', '/config/micro.conf', '--iglu', '/config/iglu.json'],
       OpenStdin: false,
       StdinOnce: false,
-      Hostconfig: {
+      HostConfig: {
         Binds: [`${process.cwd()}/test/micro-config:/config`],
         PortBindings: {
           '9090/tcp': [
@@ -67,19 +72,19 @@ export const start = () => {
     .then((c) => {
       return c.start().then(() => {
         const outs = new Writable({
-          write(chunk, encoding, callback) {
+          write(chunk, _, callback) {
             let found = chunk.toString().includes('REST interface bound');
             if (found) this.end();
             callback();
           },
         });
 
-        c.attach({ stream: true, stdout: true, stderr: true }, (err, stream) => {
-          stream.pipe(process.stdout);
-          stream.pipe(outs);
+        c.attach({ stream: true, stdout: true, stderr: true }, (_, stream) => {
+          stream?.pipe(process.stdout);
+          stream?.pipe(outs);
         });
 
-        return new Promise((resolve) => {
+        return new Promise<DockerWrapper>((resolve) => {
           outs.on('finish', () =>
             c.inspect().then((info) => {
               resolve({
@@ -93,9 +98,9 @@ export const start = () => {
     });
 };
 
-export const stop = (container) => container.stop().then(() => container.remove());
+export const stop = (container: Docker.Container) => container.stop().then(() => container.remove());
 
-const createMicroCall = (url) => () =>
+const createMicroCall = (url: string) => () =>
   new Promise((resolve, reject) => {
     const req = http.request(url, (res) => {
       let body = '';
@@ -110,5 +115,5 @@ const createMicroCall = (url) => () =>
     req.end();
   });
 
-export const fetchResults = (containerUrl) =>
-  createMicroCall(`http://${containerUrl}/micro/good`)().then((good) => JSON.parse(good));
+export const fetchResults = (containerUrl: string) =>
+  createMicroCall(`http://${containerUrl}/micro/good`)().then((good: unknown) => JSON.parse(good as string));

@@ -5,6 +5,7 @@
   </head>
   <body style="width: 2000px; height: 2000px; position: relative">
     <div id="init"></div>
+    <div id="currentPageViewId"></div>
     <div id="numEvents"></div>
     <div id="middle" style="position: absolute; top: 50%; left: 50%">Middle</div>
     <div id="bottomRight" style="position: absolute; bottom: 0; right: 0">Bottom right</div>
@@ -77,9 +78,9 @@
         spActivity('trackPageView');
       }
 
-      function getCurrentPageViewId(cb) {
+      function getCurrentPageViewId() {
         spActivity(function () {
-          cb(this.sp.getPageViewId());
+          document.getElementById('currentPageViewId').innerText = this.sp.getPageViewId();
         });
       }
 

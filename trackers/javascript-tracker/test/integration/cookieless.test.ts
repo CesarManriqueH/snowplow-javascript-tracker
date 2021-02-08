@@ -33,17 +33,17 @@
  */
 import util from 'util';
 import F from 'lodash/fp';
-import { fetchResults, start, stop } from '../micro';
+import { DockerWrapper, fetchResults, start, stop } from '../micro';
 
-const dumpLog = (log) => console.log(util.inspect(log, true, null, true));
+const dumpLog = (log: Array<unknown>) => console.log(util.inspect(log, true, null, true));
 
-const retrieveSchemaData = (schema) => F.compose(F.get('data'), F.find({ schema }), F.get('data'));
+const retrieveSchemaData = (schema: unknown) => F.compose(F.get('data'), F.find({ schema }), F.get('data'));
 
 describe('Anonymous tracking features', () => {
-  let log = [];
-  let docker;
+  let log: Array<unknown> = [];
+  let docker: DockerWrapper;
 
-  const listContains = (items, ev) => F.some(F.isMatch(ev), items);
+  const listContains = (items: Array<unknown>, ev: unknown) => F.some(F.isMatch(ev as object), items);
 
   beforeAll(() => {
     browser.call(() => {

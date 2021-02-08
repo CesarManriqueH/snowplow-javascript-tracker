@@ -20,7 +20,7 @@ const plugins = [
   json(),
   nodeResolve({ browser: true }),
   commonjs(),
-  ts(),
+  ts({ tsconfig: './tsconfig.prod.json' }),
   compiler(),
   cleanup({ comments: 'none' }),
   banner(bannerContent),

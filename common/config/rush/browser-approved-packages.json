@@ -119,6 +119,10 @@
       "allowedCategories": [ "trackers" ]
     },
     {
+      "name": "@types/dockerode",
+      "allowedCategories": [ "trackers" ]
+    },
+    {
       "name": "@types/jest",
       "allowedCategories": [ "libraries", "plugins", "trackers" ]
     },
@@ -140,7 +144,7 @@
     },
     {
       "name": "@types/node",
-      "allowedCategories": [ "libraries", "plugins" ]
+      "allowedCategories": [ "libraries", "plugins", "trackers" ]
     },
     {
       "name": "@types/sha1",
@@ -261,6 +265,10 @@
     {
       "name": "moment-timezone",
       "allowedCategories": [ "plugins", "trackers" ]
+    },
+    {
+      "name": "npm-run-all",
+      "allowedCategories": [ "trackers" ]
     },
     {
       "name": "prettier",

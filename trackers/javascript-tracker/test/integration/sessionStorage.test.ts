@@ -33,15 +33,15 @@
  */
 import util from 'util';
 import F from 'lodash/fp';
-import { fetchResults, start, stop } from '../micro';
+import { DockerWrapper, fetchResults, start, stop } from '../micro';
 
-const dumpLog = (log) => console.log(util.inspect(log, true, null, true));
+const dumpLog = (log: Array<unknown>) => console.log(util.inspect(log, true, null, true));
 
 describe('Sessions', () => {
-  let log = [];
-  let docker;
+  let log: Array<unknown> = [];
+  let docker: DockerWrapper;
 
-  const logContains = (ev) => F.some(F.isMatch(ev), log);
+  const logContains = (ev: unknown) => F.some(F.isMatch(ev as object), log);
 
   beforeAll(() => {
     browser.call(() => {
@@ -103,7 +103,7 @@ describe('Sessions', () => {
   });
 
   it('should only increment domain_sessionidx outside of session timeout (local storage)', () => {
-    const withSingleVid = (ev) =>
+    const withSingleVid = (ev: unknown) =>
       F.get('event.name_tracker', ev) === 'localStorageSessionTracker' && F.get('event.domain_sessionidx', ev) === 1;
 
     expect(F.size(F.filter(withSingleVid, log))).toBe(2);
@@ -111,7 +111,7 @@ describe('Sessions', () => {
   });
 
   it('should only increment domain_sessionidx outside of session timeout (anonymous session tracking)', () => {
-    const withSingleVid = (ev) =>
+    const withSingleVid = (ev: unknown) =>
       F.get('event.name_tracker', ev) === 'anonymousSessionTracker' && F.get('event.domain_sessionidx', ev) === 1;
 
     expect(F.size(F.filter(withSingleVid, log))).toBe(2);
@@ -119,7 +119,7 @@ describe('Sessions', () => {
   });
 
   it('should only increment domain_sessionidx outside of session timeout (cookie storage)', () => {
-    const withSingleVid = (ev) =>
+    const withSingleVid = (ev: unknown) =>
       F.get('event.name_tracker', ev) === 'cookieSessionTracker' && F.get('event.domain_sessionidx', ev) === 1;
 
     expect(F.size(F.filter(withSingleVid, log))).toBe(2);

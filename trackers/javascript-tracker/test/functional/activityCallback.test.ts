@@ -33,6 +33,13 @@
  */
 import F from 'lodash/fp';
 
+declare var trackPageView: () => void;
+declare var findMaxX: () => number;
+declare var findMaxY: () => number;
+declare var getCurrentPageViewId: () => void;
+declare var findFirstEventForPageViewId: (id: string) => Record<string, unknown>;
+declare var findLastEventForPageViewId: (id: string) => Record<string, unknown>;
+
 describe('Activity tracking with callbacks', () => {
   it('reports events on scroll', () => {
     browser.url('/activity-callback.html?test1');
@@ -66,13 +73,10 @@ describe('Activity tracking with callbacks', () => {
 
     browser.execute(() => window.scrollTo(0, 0));
 
-    const firstPageViewId = browser.execute(() => {
-      var pid;
-      getCurrentPageViewId(function (id) {
-        pid = id;
-      });
-      return pid;
+    browser.execute(() => {
+      getCurrentPageViewId();
     });
+    const firstPageViewId = $('#currentPageViewId').getText();
 
     $('#bottomRight').scrollIntoView();
     $('#middle').scrollIntoView();
@@ -91,13 +95,10 @@ describe('Activity tracking with callbacks', () => {
       timeoutMsg: 'expected > 1 event after 10s',
     });
 
-    const secondPageViewId = browser.execute(() => {
-      var pid;
-      getCurrentPageViewId(function (id) {
-        pid = id;
-      });
-      return pid;
+    browser.execute(() => {
+      getCurrentPageViewId();
     });
+    const secondPageViewId = $('#currentPageViewId').getText();
 
     // sanity check
     expect(firstPageViewId).not.toEqual(secondPageViewId);

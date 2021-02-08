@@ -4,7 +4,6 @@ from http.server import HTTPServer, BaseHTTPRequestHandler
 from http.client import NO_CONTENT
 from pprint import pprint
 
-
 gif_string = b'GIF87a\x01\x00\x01\x00\x80\x00\x00\xff\xff\xff\xff\xff\xff,\x00\x00\x00\x00\x01\x00\x01\x00\x00\x02\x02D\x01\x00;'
 file_path = os.path.dirname(__file__)
 

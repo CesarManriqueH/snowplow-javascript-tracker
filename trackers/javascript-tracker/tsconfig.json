@@ -1,7 +1,7 @@
 {
-  "extends": "../../tsconfig.json",
+  "extends": "./tsconfig.prod.json",
   "compilerOptions": {
-    /* Basic Options */
-    "declaration": false /* Generates corresponding '.d.ts' file. */
-  }
+    "types": ["jest", "node", "@wdio/sync", "@wdio/jasmine-framework"]
+  },
+  "include": ["./test/**/*.test.ts"]
 }

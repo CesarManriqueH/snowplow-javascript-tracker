@@ -33,14 +33,14 @@
  */
 import util from 'util';
 import F from 'lodash/fp';
-import { fetchResults, start, stop } from '../micro';
+import { DockerWrapper, fetchResults, start, stop } from '../micro';
 import { version } from '../../package.json';
 
-const dumpLog = (log) => console.log(util.inspect(log, true, null, true));
+const dumpLog = (log: Array<unknown>) => console.log(util.inspect(log, true, null, true));
 
-const retrieveSchemaData = (schema) => F.compose(F.get('data'), F.find({ schema }), F.get('data'));
+const retrieveSchemaData = (schema: unknown) => F.compose(F.get('data'), F.find({ schema }), F.get('data'));
 
-const loadUrlAndWait = (url) => {
+const loadUrlAndWait = (url: string) => {
   browser.url(url);
   browser.waitUntil(() => $('#init').getText() === 'true', {
     timeout: 5000,
@@ -71,11 +71,11 @@ const geoContext = {
 
 describe('Snowplow Micro integration', () => {
   let eventMethods = ['get', 'post', 'beacon'];
-  let log = [];
-  let docker;
+  let log: Array<unknown> = [];
+  let docker: DockerWrapper;
 
-  const logContains = (ev) => F.some(F.isMatch(ev), log);
-  const logContainsFn = (ev) => F.some(isMatchWithCallback(ev), log);
+  const logContains = (ev: unknown) => F.some(F.isMatch(ev as object), log);
+  const logContainsFn = (ev: unknown) => F.some(isMatchWithCallback(ev as object), log);
 
   beforeAll(() => {
     browser.call(() => {

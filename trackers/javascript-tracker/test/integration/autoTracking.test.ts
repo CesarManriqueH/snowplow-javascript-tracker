@@ -34,9 +34,9 @@
 
 import util from 'util';
 import F from 'lodash/fp';
-import { fetchResults, start, stop } from '../micro';
+import { fetchResults, start, stop, DockerWrapper } from '../micro';
 
-const dumpLog = (log) => console.log(util.inspect(log, true, null, true));
+const dumpLog = (log: Array<unknown>) => console.log(util.inspect(log, true, null, true));
 
 const isMatchWithCallback = F.isMatchWith((lt, rt) => (F.isFunction(rt) ? rt(lt) : undefined));
 
@@ -48,12 +48,12 @@ describe('Auto tracking', () => {
     fit('Skip IE9', () => {}); // Automated tests for IE autotracking features
   }
 
-  let log = [];
-  let docker;
+  let log: Array<unknown> = [];
+  let docker: DockerWrapper;
 
-  const logContains = (ev) => F.some(isMatchWithCallback(ev), log);
+  const logContains = (ev: unknown) => F.some(isMatchWithCallback(ev as object), log);
 
-  const loadUrlAndWait = (url) => {
+  const loadUrlAndWait = (url: string) => {
     browser.url(url);
     browser.waitUntil(() => $('#init').getText() === 'true', {
       timeout: 5000,
