@@ -119,12 +119,15 @@ export function InQueueManager(functionName: string, asyncQueue: Array<unknown>)
       names = parsedString[1];
 
       if (f === 'newTracker') {
-        const plugins = Plugins(parameterArray[2]);
-        parameterArray[2] = {
-          ...parameterArray[2],
-          plugins: plugins,
-        };
-        newTracker(parameterArray[0], parameterArray[1], parameterArray[2], functionName);
+        newTracker(
+          parameterArray[0],
+          parameterArray[1],
+          {
+            ...parameterArray[2],
+            plugins: Plugins(parameterArray[2]),
+          },
+          functionName
+        );
         continue;
       }
 

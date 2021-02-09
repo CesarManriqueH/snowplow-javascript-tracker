@@ -38,12 +38,14 @@
  * Get the name of the global input function
  */
 
-export { TrackerApi } from './tracker';
-import { Tracker, TrackerApi } from './tracker';
-import { version } from './version';
+export * from './tracker/types';
+
 import { warn, newSharedState, SharedState } from '@snowplow/browser-core';
 import pickBy from 'lodash/pickBy';
 import includes from 'lodash/includes';
+import { Tracker } from './tracker';
+import { version } from './version';
+import { Configuration, TrackerApi } from './tracker/types';
 
 const groups: Record<string, { state: SharedState; trackers: Record<string, TrackerApi> }> = {};
 
@@ -55,12 +57,7 @@ const groups: Record<string, { state: SharedState; trackers: Record<string, Trac
  * @param object argmap contains the initialisation options of the JavaScript tracker
  * @param string trackerGroup used to group multiple trackers and shared state together
  */
-export const newTracker = (
-  name: string,
-  endpoint: string,
-  argmap: Record<string, unknown> = {},
-  trackerGroup = 'snowplow'
-) => {
+export const newTracker = (name: string, endpoint: string, argmap: Configuration = {}, trackerGroup = 'snowplow') => {
   if (!groups.hasOwnProperty(trackerGroup)) {
     groups[trackerGroup] = { state: newSharedState(), trackers: {} };
   }

@@ -44,13 +44,7 @@ import {
   SharedState,
 } from '@snowplow/browser-core';
 import { Payload } from '@snowplow/tracker-core';
-
-export interface OutQueue {
-  enqueueRequest: (request: Payload, url: string) => void;
-  executeQueue: () => void;
-  setUseLocalStorage: (localStorage: boolean) => void;
-  setAnonymousTracking: (anonymous: boolean) => void;
-}
+import { OutQueue } from './types';
 
 /**
  * Object handling sending events to a collector.

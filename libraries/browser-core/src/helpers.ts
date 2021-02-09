@@ -478,7 +478,7 @@ export function isValueInArray<T>(val: T, array: T[]) {
  * @param cookieName The name of the cookie to delete
  * @param domainName The domain the cookie is in
  */
-export function deleteCookie(cookieName: string, domainName: string, sameSite: string, secure: boolean) {
+export function deleteCookie(cookieName: string, domainName?: string, sameSite?: string, secure?: boolean) {
   cookie(cookieName, '', -1, '/', domainName, sameSite, secure);
 }
 

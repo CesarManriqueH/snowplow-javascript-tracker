@@ -1,5 +1,5 @@
 /*
- * JavaScript tracker for Snowplow: tracker.js
+ * JavaScript tracker for Snowplow: out_queue.js
  *
  * Significant portions copyright 2010 Anthon Pang. Remainder copyright
  * 2012-2020 Snowplow Analytics Ltd. All rights reserved.
@@ -32,26 +32,11 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import { TrackerApi } from './tracker';
+import { Payload } from '@snowplow/tracker-core';
 
-const makeSafe = function (fn: Function) {
-  return function () {
-    try {
-      return fn.apply(this, arguments);
-    } catch (ex) {
-      // TODO: Debug mode
-    }
-  };
-};
-
-export function productionize(methods: TrackerApi) {
-  let safeMethods: Record<string, Function> = {};
-  if (typeof methods === 'object' && methods !== null) {
-    Object.getOwnPropertyNames(methods).forEach(function (val, _idx, _array) {
-      if (typeof methods[val] === 'function') {
-        safeMethods[val] = makeSafe(methods[val]);
-      }
-    });
-  }
-  return safeMethods as TrackerApi;
+export interface OutQueue {
+  enqueueRequest: (request: Payload, url: string) => void;
+  executeQueue: () => void;
+  setUseLocalStorage: (localStorage: boolean) => void;
+  setAnonymousTracking: (anonymous: boolean) => void;
 }

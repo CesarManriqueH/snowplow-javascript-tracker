@@ -33,7 +33,8 @@
  */
 
 import { SharedState } from '@snowplow/browser-core';
-import { OutQueue, OutQueueManager } from '../src/out_queue';
+import { OutQueueManager } from '../src/out_queue';
+import { OutQueue } from '../src/out_queue/types';
 
 describe('OutQueueManager', () => {
   const maxQueueSize = 2;

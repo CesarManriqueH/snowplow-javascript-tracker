@@ -20,19 +20,19 @@ const plugins = [nodeResolve({ browser: true }), commonjs(), json(), ts()];
 
 export default [
   {
-    input: './src/snowplow.ts',
+    input: './src/index.ts',
     external: [/^lodash/, ...builtinModules, ...Object.keys(pkg.dependencies)],
     plugins: [...plugins, banner(bannerContent)],
     output: [{ file: pkg.module, format: 'es' }],
   },
   {
-    input: './src/snowplow.ts',
+    input: './src/index.ts',
     plugins: [...plugins, banner(bannerContent)],
     treeshake: { moduleSideEffects: ['jstimezonedetect'] },
     output: [{ file: pkg.main, format: 'umd', name: 'snowplow' }],
   },
   {
-    input: './src/snowplow.ts',
+    input: './src/index.ts',
     plugins: [...plugins, compiler(), cleanup({ comments: 'none' }), banner(bannerContent)],
     treeshake: { moduleSideEffects: ['jstimezonedetect'] },
     output: [{ file: pkg.main.replace('.js', '.min.js'), format: 'umd', name: 'snowplow' }],

@@ -33,7 +33,7 @@
  */
 // import { trackerCore } from '@snowplow/tracker-core';
 import { JSDOM } from 'jsdom';
-import { newTracker } from '../src/snowplow';
+import { newTracker } from '../src';
 
 declare var jsdom: JSDOM;
 
