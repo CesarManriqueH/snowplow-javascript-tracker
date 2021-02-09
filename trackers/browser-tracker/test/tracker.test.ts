@@ -24,7 +24,7 @@ describe('Activity tracker behaviour', () => {
   it('supports different timings for ping vs callback activity tracking', () => {
     let callbacks = 0;
     const state = new SharedState();
-    const t = Tracker('', '', '', state, { stateStorageStrategy: 'cookies' });
+    const t = Tracker('', '', '', state, { stateStorageStrategy: 'cookie' });
     t.enableActivityTracking(10, 10);
     t.enableActivityTrackingCallback(5, 5, () => {
       callbacks++;
@@ -55,7 +55,7 @@ describe('Activity tracker behaviour', () => {
     const state = new SharedState();
     const t = Tracker('', '', '', state, {
       resetActivityTrackingOnPageView: false,
-      stateStorageStrategy: 'cookies',
+      stateStorageStrategy: 'cookie',
       encodeBase64: false,
       contexts: {
         webPage: true,
@@ -112,7 +112,7 @@ describe('Activity tracker behaviour', () => {
     const state = new SharedState();
     const t = Tracker('', '', '', state, {
       resetActivityTrackingOnPageView: false,
-      stateStorageStrategy: 'cookies',
+      stateStorageStrategy: 'cookie',
       encodeBase64: false,
       contexts: {
         webPage: true,
@@ -142,7 +142,7 @@ describe('Activity tracker behaviour', () => {
   it('does reset activity tracking on pageview by default', () => {
     const state = new SharedState();
     const t = Tracker('', '', '', state, {
-      stateStorageStrategy: 'cookies',
+      stateStorageStrategy: 'cookie',
       encodeBase64: false,
       contexts: {
         webPage: true,
@@ -182,7 +182,7 @@ describe('Activity tracker behaviour', () => {
   it('allows running callback after sending tracking events', () => {
     const state = new SharedState();
     const t = Tracker('', '', '', state, {
-      stateStorageStrategy: 'cookies',
+      stateStorageStrategy: 'cookie',
       encodeBase64: false,
       contexts: {
         webPage: true,
@@ -198,7 +198,7 @@ describe('Activity tracker behaviour', () => {
   it('fires initial delayed activity tracking on first pageview and second pageview', () => {
     const state = new SharedState();
     const t = Tracker('', '', '', state, {
-      stateStorageStrategy: 'cookies',
+      stateStorageStrategy: 'cookie',
       encodeBase64: false,
       contexts: {
         webPage: true,
@@ -264,32 +264,10 @@ describe('Activity tracker behaviour', () => {
     expect(secondPageId).toBe(extractPageId(ppl));
   });
 
-  it('does not log skipped browser features', () => {
-    const state = new SharedState();
-    const t = Tracker('', '', '', state, {
-      stateStorageStrategy: 'cookies',
-      encodeBase64: false,
-      contexts: {
-        webPage: true,
-      },
-      skippedBrowserFeatures: ['cd'],
-    });
-    t.enableActivityTracking(10, 5);
-
-    t.trackPageView();
-    t.updatePageActivity();
-    jest.advanceTimersByTime(15000);
-
-    const pps = getPPEvents(state.outQueues);
-
-    const pph = F.head(pps);
-    expect(F.hasIn(pph as any, 'evt.e.cd')).toBe(false);
-  });
-
   it('attaches enhanced ecommerce contexts to enhanced ecommerce events', () => {
     const state = new SharedState();
     const t = Tracker('', '', '', state, {
-      stateStorageStrategy: 'cookies',
+      stateStorageStrategy: 'cookie',
       encodeBase64: false,
     });
 
